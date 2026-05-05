@@ -1,28 +1,3 @@
- "version": 2,
-  "functions": {
-    "*.js": {
-      "runtime": "nodejs24.x"
-    }
-  },
-  "routes": [
-    { "src": "/api/gps",      "dest": "/gps.js" },
-    { "src": "/api/cmj",      "dest": "/cmj.js" },
-    { "src": "/api/nordbord", "dest": "/nordbord.js" },
-    { "src": "/api/hipforce", "dest": "/hipforce.js" },
-    { "src": "/api/sprint",   "dest": "/sprint.js" },
-    { "src": "/api/505",      "dest": "/505.js" },
-    { "src": "/api/broad",    "dest": "/broad.js" },
-    { "src": "/api/mas",      "dest": "/mas.js" },
-    { "src": "/api/movement", "dest": "/movement.js" },
-    { "src": "/(.*)",         "dest": "/index.html" }
-  ],
-  "headers": [
-    {
-      "source": "/(gps|cmj|nordbord|hipforce|sprint|505|broad|mas|movement)\\.js",
-      "headers": [
-        { "key": "Access-Control-Allow-Origin", "value": "*" },
-        { "key": "Cache-Control", "value": "s-maxage=60, stale-while-revalidate=300" }
-      ]
-    }
-  ]
+{
+  "version": 2
 }
