@@ -140,7 +140,7 @@ function toNum(v) {
 }
 
 function normalizePos(pos) {
-  const p = pos.trim().toUpperCase();
+  const p = String(pos).trim().toUpperCase();
   if (p.includes('GK') || p.includes('GOAL')) return 'GK';
   if (p.includes('CB') || p.includes('CENTER BACK') || p.includes('CENTRE BACK')) return 'CB';
   if (p.includes('FB') || p.includes('FULL') || p.includes('BACK')) return 'FB';
