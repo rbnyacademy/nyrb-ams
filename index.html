@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f0f0f0;--card:#fff;--red:#cc0000;--red2:#990000;--text:#1a1a1a;--text2:#555;--text3:#888;--border:#ddd;--font:'Barlow Condensed',sans-serif;--fontb:'Barlow',sans-serif;--tbh:52px;--nvh:38px;}
+body{background:var(--bg);color:var(--text);font-family:var(--fontb);font-size:13px;min-height:100vh}
+.topbar{background:var(--red);display:flex;align-items:center;gap:10px;padding:0 14px;height:var(--tbh);position:sticky;top:0;z-index:300;overflow:hidden}
+.logo-box{background:#fff;border-radius:50%;width:36px;height:36px;flex-shrink:0;display:flex;align-items:center;justify-content:center;}
+.logo-box img{width:32px;height:32px;border-radius:50%;object-fit:cover}
+.rpt-title{font-family:var(--font);font-size:17px;font-weight:800;letter-spacing:1px;color:#fff;white-space:nowrap;flex-shrink:0}
+.tb-pills{display:flex;gap:5px;align-items:center;flex-wrap:nowrap;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;flex:1}
+.tb-pills::-webkit-scrollbar{display:none}
+.pill{background:rgba(0,0,0,0.22);border:1px solid rgba(255,255,255,0.28);color:#fff;font-family:var(--font);font-size:11px;font-weight:700;padding:4px 10px;border-radius:3px;display:flex;align-items:center;gap:3px;white-space:nowrap;flex-shrink:0}
+.pill select{background:transparent;border:none;color:#fff;font-family:var(--font);font-size:11px;font-weight:700;outline:none;cursor:pointer;max-width:130px}
+.pill select option{color:#000;background:#fff}
+.nav{background:#fff;border-bottom:3px solid var(--red);display:flex;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;position:sticky;top:var(--tbh);z-index:200;height:var(--nvh)}
+.nav::-webkit-scrollbar{display:none}
+.nav-tab{padding:0 12px;height:var(--nvh);display:flex;align-items:center;font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;color:var(--text2);cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-3px;white-space:nowrap;transition:all .12s;flex-shrink:0}
+.nav-tab:hover{color:var(--red);background:#fff5f5}
+.nav-tab.active{color:var(--red);border-bottom-color:var(--red);background:#fff5f5}
+.page{display:none}.page.active{display:block}
+.main{padding:8px}
+.pg{display:grid;gap:7px}.sg{margin-bottom:7px}
+.g2{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr 1fr}.g4{grid-template-columns:1fr 1fr 1fr 1fr}
+@media(max-width:900px){.g4{grid-template-columns:1fr 1fr}.g3{grid-template-columns:1fr 1fr}}
+@media(max-width:480px){.g2,.g3,.g4{grid-template-columns:1fr}}
+.panel{background:#fff;border:1px solid var(--border);padding:10px 10px 6px}
+.pt{font-family:var(--font);font-size:12px;font-weight:800;text-transform:uppercase;color:var(--red);text-align:center;margin-bottom:5px;letter-spacing:.3px}
+.ptl{text-align:left;margin-bottom:8px}
+.cb{position:relative;height:180px}.cb-sm{position:relative;height:140px}.cb-lg{position:relative;height:220px}
+/* DAILY HEADER */
+.daily-header{background:#fff;border-bottom:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.dh-kpis{display:flex;gap:18px;flex-wrap:wrap;flex:1}
+.kv{font-family:var(--font);font-size:20px;font-weight:800;color:var(--red);line-height:1}
+.kl{font-size:10px;color:var(--text2);margin-top:1px}
+.leg-bar{background:#fff;padding:4px 14px 6px;border-bottom:1px solid var(--border);display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.li{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--text2)}
+.ld{width:9px;height:9px;border-radius:50%}
+/* CONTROLS */
+.ctrl-row{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:8px}
+select.ctrl,input.ctrl{background:#fff;border:1px solid var(--border);color:var(--text);padding:4px 9px;border-radius:3px;font-size:12px;font-family:var(--fontb);outline:none;cursor:pointer}
+select.ctrl:focus{border-color:var(--red)}
+.cl{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.4px}
+/* TABLE */
+.tw{background:#fff;border:1px solid var(--border);overflow:auto}
+table{width:100%;border-collapse:collapse}
+th{font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:#fff;padding:7px 10px;text-align:left;white-space:nowrap;background:var(--red)}
+td{padding:7px 10px;border-bottom:1px solid var(--border);font-size:12px;white-space:nowrap}
+tr:hover td{background:#fff5f5}
+tr:last-child td{border-bottom:none}
+.badge{display:inline-block;padding:2px 7px;border-radius:3px;font-size:10px;font-weight:700;font-family:var(--font)}
+.bg{background:rgba(0,150,50,.1);color:#006020;border:1px solid rgba(0,150,50,.2)}
+.br{background:rgba(204,0,0,.1);color:#cc0000;border:1px solid rgba(204,0,0,.2)}
+.bgy{background:rgba(0,0,0,.06);color:var(--text2);border:1px solid var(--border)}
+/* GAUGES */
+.gauge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;margin-bottom:8px}
+.gauge-card{background:#fff;border:1px solid var(--border);padding:12px 10px 10px;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
+.gname{font-family:var(--font);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.3px;color:var(--red);text-align:center;margin-bottom:8px}
+.gstats{display:flex;width:100%;margin-top:8px;padding-top:7px;border-top:1px solid var(--border)}
+.gs{text-align:center;flex:1}.gsl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}.gsv{font-family:var(--font);font-size:14px;font-weight:800}
+.gdiv{width:1px;background:var(--border)}
+/* MD chips */
+.md-chips{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:8px}
+.md-chip{background:#fff;border:1px solid var(--border);padding:7px 4px;text-align:center;border-top:3px solid var(--red)}
+.mcd{font-family:var(--font);font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:3px}
+.mcv{font-family:var(--font);font-size:17px;font-weight:800;line-height:1}
+.mcu{font-size:9px;color:var(--text3);margin-top:2px}
+/* VALD dark */
+.vald-wrap{background:#f0f0f0}
+.vald-tb{background:#fff;border-bottom:1px solid #ddd;padding:8px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.vtitle{background:var(--red);font-family:var(--font);font-size:17px;font-weight:800;letter-spacing:1px;color:#fff;padding:4px 16px;border-radius:3px;flex:1;text-align:center;text-transform:uppercase}
+.vc{background:#fff;border:1px solid #ddd;color:#1a1a1a;padding:5px 10px;border-radius:3px;font-size:12px;font-family:var(--fontb);outline:none;cursor:pointer}
+.vl{font-size:11px;color:#555;font-family:var(--font);font-weight:700;text-transform:uppercase;letter-spacing:.4px}
+.vd{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px;background:#f0f0f0}
+@media(max-width:700px){.vd{grid-template-columns:1fr}}
+.vp{background:#fff;border:1px solid #ddd;padding:12px}
+.vpf{grid-column:1/-1}
+.vpt{font-family:var(--font);font-size:12px;font-weight:800;text-transform:uppercase;color:#1a1a1a;margin-bottom:4px}
+.vpt span{color:var(--red)}
+.vleg{display:flex;gap:14px;margin-bottom:8px;flex-wrap:wrap}
+.vli{display:flex;align-items:center;gap:5px;font-size:11px;color:#555}
+.vld{width:10px;height:10px;border-radius:2px}
+.mt{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}
+.mt th{background:#cc0000;color:#fff;font-family:var(--font);font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:5px 8px;text-align:left;border-bottom:1px solid #444}
+.mt td{padding:5px 8px;border-bottom:1px solid #eee;color:#1a1a1a}
+.mt tr:last-child td{border-bottom:none}
+.vbg{background:rgba(0,180,60,.15);color:#40d060;border:1px solid rgba(0,180,60,.3);display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700;font-family:var(--font)}
+.vbr{background:rgba(204,0,0,.2);color:#ff5555;border:1px solid rgba(204,0,0,.35);display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700;font-family:var(--font)}
+.vby{background:rgba(200,150,0,.18);color:#d4a820;border:1px solid rgba(200,150,0,.3);display:inline-block;padding:1px 7px;border-radius:3px;font-size:10px;font-weight:700;font-family:var(--font)}
+.vax{display:flex;align-items:center;gap:4px}
+.vaxT{flex:1;height:5px;background:#eee;border-radius:2px;overflow:hidden;display:flex}
+.vaxL{height:100%;background:#ddd}.vaxR{height:100%;background:var(--red)}
+.vaxl{font-size:9px;font-weight:600;min-width:22px;color:#555}
+/* Movement Screen */
+.ms-nav{background:#fff;border-bottom:2px solid #eee;display:flex;overflow-x:auto;-ms-overflow-style:none;scrollbar-width:none;height:34px}
+.ms-nav::-webkit-scrollbar{display:none}
+.mst{padding:0 14px;height:34px;display:flex;align-items:center;font-family:var(--font);font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;transition:all .12s;flex-shrink:0}
+.mst:hover{color:var(--red)}.mst.active{color:var(--red);border-bottom-color:var(--red)}
+.msp{display:none}.msp.active{display:block}
+.scale-box{background:#fff;border:1px solid var(--border);border-radius:4px;padding:10px 12px;margin-bottom:8px}
+.sbt{font-family:var(--font);font-size:11px;font-weight:800;text-transform:uppercase;color:var(--red);margin-bottom:6px;letter-spacing:.3px}
+.sis{display:flex;gap:5px;flex-wrap:wrap}
+.si{display:flex;align-items:center;gap:6px;padding:4px 8px;border-radius:3px;border:1px solid var(--border);flex:1;min-width:150px;font-size:10px;color:var(--text2);line-height:1.3}
+.sn{padding:1px 6px;border-radius:2px;font-family:var(--font);font-weight:800;font-size:14px;color:#fff}
+.ef{background:#fff;border:1px solid var(--border);padding:12px;margin-bottom:8px}
+.fgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:8px}
+.fg label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:3px;font-family:var(--font)}
+.fg select,.fg input{width:100%;background:#f8f8f8;border:1px solid var(--border);color:var(--text);padding:5px 8px;border-radius:3px;font-size:12px;font-family:var(--fontb);outline:none}
+.fg select:focus,.fg input:focus{border-color:var(--red)}
+.sr{display:flex;gap:3px;margin-top:3px}
+.sb{width:28px;height:28px;border-radius:3px;border:2px solid var(--border);background:#f8f8f8;font-family:var(--font);font-size:14px;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--text3)}
+.sb:hover{border-color:var(--red);color:var(--red)}
+.sb.sel{border-color:var(--red);background:var(--red);color:#fff}
+.bsave{background:var(--red);color:#fff;border:none;padding:7px 18px;border-radius:3px;font-family:var(--font);font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;margin-top:10px}
+.nf{width:100%;border:1px solid var(--border);border-radius:3px;padding:6px;font-size:12px;font-family:var(--fontb);resize:vertical;min-height:50px;background:#f8f8f8}
+.nf:focus{outline:none;border-color:var(--red)}
+.rpill{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:3px;font-family:var(--font);font-size:14px;font-weight:800;color:#fff}
+.pb{height:5px;background:#eee;border-radius:3px;overflow:hidden;margin-top:4px}
+.pf{height:100%;border-radius:3px}
+.rn{font-family:var(--font);font-size:16px;font-weight:800;color:#ccc}.rn.top{color:var(--red)}
+.rb-w{display:flex;align-items:center;gap:5px}.rb{height:5px;border-radius:2px;background:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="logo-box"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/New_York_Red_Bulls_logo.svg/100px-New_York_Red_Bulls_logo.svg.png" alt="NYRB" onerror="this.style.display='none'"/></div>
+  <div class="rpt-title">NY Red Bulls Academy</div>
+  <div class="tb-pills">
+    <div class="pill" style="cursor:pointer" onclick="loadAllData()" title="Refresh data">↻ <span id="last-updated" style="font-size:10px;opacity:.8">Loading…</span></div>
+    <div class="pill"><select id="g-age" onchange="filterAge()"><option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option><option value="U16">U16</option><option value="U18">U18</option></select>▾</div>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="nav-tab active" data-p="daily">Daily Report</div>
+  <div class="nav-tab" data-p="matchday">Match Day</div>
+  <div class="nav-tab" data-p="teamday">Player / Session</div>
+  <div class="nav-tab" data-p="teamweek">Team / Week</div>
+  <div class="nav-tab" data-p="playerday">Player / Day</div>
+  <div class="nav-tab" data-p="playerweek">Player / Week</div>
+  <div class="nav-tab" data-p="mdpm">MD +/-</div>
+  <div class="nav-tab" data-p="vald">VALD</div>
+  <div class="nav-tab" data-p="testing">Testing</div>
+  <div class="nav-tab" data-p="movement">Movement Screen</div>
+  <div class="nav-tab" data-p="rank">Rankings</div>
+</div>
+
+<!-- ═══ DAILY ═══ -->
+<div class="page active" id="page-daily">
+  <div class="daily-header">
+    <div class="dh-kpis" id="daily-kpis"></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-shrink:0;flex-wrap:wrap">
+      <span class="cl">Age:</span>
+      <select class="ctrl" id="g-age-daily" onchange="initDaily()"><option value="all">All Ages</option><option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option><option value="U16">U16</option><option value="U18">U18</option></select>
+      <span class="cl">Date:</span>
+      <select class="ctrl" id="g-date" onchange="initDaily()"></select>
+      <span class="cl">Pos:</span>
+      <select class="ctrl" id="g-pos" onchange="initDaily()">
+        <option value="all">All</option><option value="CB">CB</option><option value="FW">FW</option>
+        <option value="FB">FB</option><option value="GK">GK</option><option value="MF">MF</option>
+      </select>
+    </div>
+  </div>
+  <div class="leg-bar">
+    <span style="font-size:11px;font-weight:700;color:var(--text2);margin-right:2px">Position</span>
+    <div class="li"><div class="ld" style="background:#b0b0b0"></div>Center Back</div>
+    <div class="li"><div class="ld" style="background:#e8a0a8"></div>Forward</div>
+    <div class="li"><div class="ld" style="background:#444"></div>Fullback</div>
+    <div class="li"><div class="ld" style="background:#1a1a1a"></div>Goalkeeper</div>
+    <div class="li"><div class="ld" style="background:#cc0000"></div>Midfielder</div>
+  </div>
+  <div class="main">
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Total Distance (m)</div><div class="cb"><canvas id="c-dist"></canvas></div></div><div class="panel"><div class="pt">Distance Per Minute</div><div class="cb"><canvas id="c-dpm"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">High Speed Running (m)</div><div class="cb"><canvas id="c-hsr"></canvas></div></div><div class="panel"><div class="pt">Sprint Distance (m)</div><div class="cb"><canvas id="c-sprint"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Explosive Distance (m)</div><div class="cb"><canvas id="c-expl"></canvas></div></div><div class="panel"><div class="pt">Max Speed (m/s)</div><div class="cb"><canvas id="c-maxspd"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Accelerations (high)</div><div class="cb"><canvas id="c-acc"></canvas></div></div><div class="panel"><div class="pt">Decelerations (high)</div><div class="cb"><canvas id="c-dec"></canvas></div></div></div>
+  </div>
+</div>
+
+<!-- ═══ MATCH DAY ═══ -->
+<div class="page" id="page-matchday">
+  <div class="main">
+    <div class="ctrl-row">
+      <span class="cl">Match:</span><select class="ctrl" id="md-sel"></select>
+      <span class="cl">Filter:</span>
+      <select class="ctrl" id="md-load">
+        <option value="all">All Players</option>
+        <option value="full">Full Load Only</option>
+        <option value="under">Underload Only</option>
+      </select>
+    </div>
+    <div class="gauge-grid" id="gauges"></div>
+  </div>
+</div>
+
+<!-- ═══ PLAYER/SESSION ═══ -->
+<div class="page" id="page-teamday">
+  <div class="main">
+    <div class="ctrl-row"><span class="cl">Player:</span><select class="ctrl" id="td-player"></select><span class="cl">Sessions:</span><select class="ctrl" id="td-n"><option value="7">Last 7 days</option><option value="10">Last 10</option><option value="20">Last 20</option><option value="30">Last 30</option></select></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Total Distance</div><div class="cb"><canvas id="c-td-dist"></canvas></div></div><div class="panel"><div class="pt">Distance Per Minute</div><div class="cb"><canvas id="c-td-dpm"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">HSR Distance</div><div class="cb"><canvas id="c-td-hsr"></canvas></div></div><div class="panel"><div class="pt">Sprint Distance</div><div class="cb"><canvas id="c-td-sprint"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Explosive Distance</div><div class="cb"><canvas id="c-td-expl"></canvas></div></div><div class="panel"><div class="pt">Max Speed</div><div class="cb"><canvas id="c-td-maxspd"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Accelerations</div><div class="cb"><canvas id="c-td-acc"></canvas></div></div><div class="panel"><div class="pt">Decelerations</div><div class="cb"><canvas id="c-td-dec"></canvas></div></div></div>
+  </div>
+</div>
+
+<!-- ═══ TEAM/WEEK ═══ -->
+<div class="page" id="page-teamweek">
+  <div class="main">
+    <div class="ctrl-row"><span class="cl">Week range:</span><select class="ctrl" id="tw-range" onchange="initTeamweek()"><option value="4">Last 4 weeks</option><option value="8">Last 8 weeks</option><option value="12" selected>Last 12 weeks</option><option value="all">All weeks</option></select></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Total Distance</div><div class="cb"><canvas id="c-tw-dist"></canvas></div></div><div class="panel"><div class="pt">Distance Per Minute</div><div class="cb"><canvas id="c-tw-dpm"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">HSR Distance</div><div class="cb"><canvas id="c-tw-hsr"></canvas></div></div><div class="panel"><div class="pt">Sprint Distance</div><div class="cb"><canvas id="c-tw-sprint"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Explosive Distance</div><div class="cb"><canvas id="c-tw-expl"></canvas></div></div><div class="panel"><div class="pt">Max Speed</div><div class="cb"><canvas id="c-tw-maxspd"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Accelerations</div><div class="cb"><canvas id="c-tw-acc"></canvas></div></div><div class="panel"><div class="pt">Decelerations</div><div class="cb"><canvas id="c-tw-dec"></canvas></div></div></div>
+  </div>
+</div>
+
+<!-- ═══ PLAYER/DAY ═══ -->
+<div class="page" id="page-playerday">
+  <div class="main">
+    <div class="ctrl-row"><span class="cl">Player:</span><select class="ctrl" id="pd-player"></select><span class="cl">Sessions:</span><select class="ctrl" id="pd-n"><option value="7">Last 7 days</option><option value="10">Last 10</option><option value="20">Last 20</option><option value="30">Last 30</option></select></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Total Distance</div><div class="cb"><canvas id="c-pd-dist"></canvas></div></div><div class="panel"><div class="pt">Distance Per Minute</div><div class="cb"><canvas id="c-pd-dpm"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">HSR Distance</div><div class="cb"><canvas id="c-pd-hsr"></canvas></div></div><div class="panel"><div class="pt">Sprint Distance</div><div class="cb"><canvas id="c-pd-sprint"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Explosive Distance</div><div class="cb"><canvas id="c-pd-expl"></canvas></div></div><div class="panel"><div class="pt">Max Speed</div><div class="cb"><canvas id="c-pd-maxspd"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Accelerations</div><div class="cb"><canvas id="c-pd-acc"></canvas></div></div><div class="panel"><div class="pt">Decelerations</div><div class="cb"><canvas id="c-pd-dec"></canvas></div></div></div>
+  </div>
+</div>
+
+<!-- ═══ PLAYER/WEEK ═══ -->
+<div class="page" id="page-playerweek">
+  <div class="main">
+    <div class="ctrl-row"><span class="cl">Player:</span><select class="ctrl" id="pw-player"></select><span class="cl">Week range:</span><select class="ctrl" id="pw-range" onchange="renderPlayerWeek()"><option value="4">Last 4 weeks</option><option value="8">Last 8 weeks</option><option value="12" selected>Last 12 weeks</option><option value="all">All weeks</option></select></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Total Distance</div><div class="cb"><canvas id="c-pw-dist"></canvas></div></div><div class="panel"><div class="pt">Distance Per Minute</div><div class="cb"><canvas id="c-pw-dpm"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">HSR Distance</div><div class="cb"><canvas id="c-pw-hsr"></canvas></div></div><div class="panel"><div class="pt">Sprint Distance</div><div class="cb"><canvas id="c-pw-sprint"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Explosive Distance</div><div class="cb"><canvas id="c-pw-expl"></canvas></div></div><div class="panel"><div class="pt">Max Speed</div><div class="cb"><canvas id="c-pw-maxspd"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Accelerations</div><div class="cb"><canvas id="c-pw-acc"></canvas></div></div><div class="panel"><div class="pt">Decelerations</div><div class="cb"><canvas id="c-pw-dec"></canvas></div></div></div>
+  </div>
+</div>
+
+<!-- ═══ MD+/- ═══ -->
+<div class="page" id="page-mdpm">
+  <div class="main">
+    <div class="ctrl-row"><span class="cl">Player:</span><select class="ctrl" id="mdpm-player"></select></div>
+    <div class="md-chips" id="mdpm-chips"></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Total Distance vs MD Avg</div><div class="cb"><canvas id="c-mdpm-dist"></canvas></div></div><div class="panel"><div class="pt">HSR vs MD Avg</div><div class="cb"><canvas id="c-mdpm-hsr"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Sprint vs MD Avg</div><div class="cb"><canvas id="c-mdpm-sprint"></canvas></div></div><div class="panel"><div class="pt">Explosive vs MD Avg</div><div class="cb"><canvas id="c-mdpm-expl"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Accelerations vs MD Avg</div><div class="cb"><canvas id="c-mdpm-acc"></canvas></div></div><div class="panel"><div class="pt">Decelerations vs MD Avg</div><div class="cb"><canvas id="c-mdpm-dec"></canvas></div></div></div>
+  </div>
+</div>
+
+<!-- ═══ VALD ═══ -->
+<div class="page" id="page-vald">
+  <div class="vald-wrap">
+    <div class="vald-tb">
+      <div style="display:flex;align-items:center;gap:6px"><span class="vl">Name</span><select class="vc" id="vald-player"></select></div>
+      <div class="vtitle">NY Red Bulls Academy Testing</div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="vl">Age</span><select class="vc" id="vald-age-f" onchange="renderVald()"><option value="all">All</option><option value="U14">U14</option><option value="U15">U15</option><option value="U16">U16</option><option value="U18">U18</option></select></div>
+      <div style="display:flex;align-items:center;gap:6px"><span class="vl">Date range</span><select class="vc" id="vald-date-range" onchange="renderVald()"><option value="all">All Dates</option><option value="latest">Latest only</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option></select></div>
+    </div>
+    <div class="vd" id="vald-dash"></div>
+  </div>
+</div>
+
+<!-- ═══ TESTING ═══ -->
+<div class="page" id="page-testing">
+  <div class="main">
+    <div class="ctrl-row">
+      <span class="cl">Age Group:</span>
+      <select class="ctrl" id="test-age" onchange="onTestChange()" multiple size="3" style="height:auto;min-width:90px">
+        <option value="all" selected>All Ages</option><option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option><option value="U16">U16</option><option value="U18">U18</option>
+      </select>
+      <span class="cl">Test:</span>
+      <select class="ctrl" id="test-sort" onchange="onTestChange()">
+        <option value="">— Select a test —</option>
+        <optgroup label="30m Sprint">
+          <option value="total">30m Total Time</option>
+          <option value="s0_10">0–10m Split</option>
+          <option value="s10_20">10–20m Split</option>
+          <option value="s20_30">20–30m Split</option>
+        </optgroup>
+        <optgroup label="Agility">
+          <option value="t505">5-0-5</option>
+        </optgroup>
+        <optgroup label="Aerobic">
+          <option value="mas">MAS Testing</option>
+        </optgroup>
+      </select>
+    </div>
+
+    <!-- Placeholder shown when nothing selected -->
+    <div id="test-placeholder" style="background:#fff;border:1px solid var(--border);padding:40px 20px;text-align:center;color:var(--text3)">
+      <div style="font-family:var(--font);font-size:22px;font-weight:800;margin-bottom:6px;color:#ccc">SELECT A TEST</div>
+      <div style="font-size:13px">Choose a test from the dropdown above to view charts and results</div>
+    </div>
+
+    <!-- Sprint section (30m splits + table) -->
+    <div id="test-sprint-section" style="display:none">
+      <div class="pg g2 sg">
+        <div class="panel"><div class="pt" id="sprint-chart-title">30m Sprint — Total Time</div><div class="cb-lg"><canvas id="c-test-total"></canvas></div></div>
+        <div class="panel"><div class="pt">0-10m Split</div><div class="cb-lg"><canvas id="c-test-0_10"></canvas></div></div>
+      </div>
+      <div class="pg g2 sg">
+        <div class="panel"><div class="pt">10-20m Split</div><div class="cb"><canvas id="c-test-10_20"></canvas></div></div>
+        <div class="panel"><div class="pt">20-30m Split</div><div class="cb"><canvas id="c-test-20_30"></canvas></div></div>
+      </div>
+      <div class="panel sg"><div class="pt ptl">Sprint Results</div><div class="tw"><table id="tbl-testing"></table></div></div>
+    </div>
+
+    <!-- MAS section -->
+    <div id="test-mas-section" style="display:none">
+      <div style="background:var(--red);color:#fff;font-family:var(--font);font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:8px 14px;border-radius:3px 3px 0 0;margin-bottom:0">MAS Testing — Maximal Aerobic Speed</div>
+      <div style="background:#fff;border:1px solid var(--border);border-top:none;padding:10px 10px 6px;margin-bottom:7px">
+        <div class="ctrl-row" style="margin-bottom:8px">
+          <span class="cl">Sort by:</span>
+          <select class="ctrl" id="mas-sort" onchange="renderMAS()">
+            <option value="mas">MAS Score (highest)</option>
+            <option value="dist">Distance (furthest)</option>
+            <option value="name">Name (A–Z)</option>
+          </select>
+          <span class="cl">Test Date:</span>
+          <select class="ctrl" id="mas-date" onchange="renderMAS()">
+            <option value="best">Best Score</option>
+            <option value="2025-07-20">2025-07-20</option>
+            <option value="2025-07-22">2025-07-22</option>
+            <option value="2025-08-03">2025-08-03</option>
+            <option value="2025-11-25">2025-11-25</option>
+            <option value="2025-11-30">2025-11-30</option>
+            <option value="2025-12-01">2025-12-01</option>
+            <option value="2025-12-03">2025-12-03</option>
+            <option value="2025-12-04">2025-12-04</option>
+            <option value="2026-01-14">2026-01-14</option>
+            <option value="2026-01-15">2026-01-15</option>
+          </select>
+        </div>
+        <div class="pg g2 sg">
+          <div class="panel"><div class="pt">MAS Score (m/s)</div><div class="cb-lg"><canvas id="c-mas-score"></canvas></div></div>
+          <div class="panel"><div class="pt">Overall Distance (m)</div><div class="cb-lg"><canvas id="c-mas-dist"></canvas></div></div>
+        </div>
+        <div class="tw"><table id="tbl-mas"></table></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ MOVEMENT SCREEN ═══ -->
+<div class="page" id="page-movement">
+  <div class="ms-nav">
+    <div class="mst active" data-ms="overview">Overview</div>
+    <div class="mst" data-ms="entry">Data Entry</div>
+  </div>
+  <div class="main">
+    <div class="msp active" id="ms-overview">
+      <div class="pg g2 sg">
+        <div class="scale-box"><div class="sbt">Lower Body Scale</div><div class="sis"><div class="si"><span class="sn" style="background:#cc0000">1</span>Needs 1-on-1 help</div><div class="si"><span class="sn" style="background:#e05000">2</span>Struggling, needed cues</div><div class="si"><span class="sn" style="background:#d4a000">3</span>Got it after 3–4 cues</div><div class="si"><span class="sn" style="background:#5a9000">4</span>1–2 cues or shaky</div><div class="si"><span class="sn" style="background:#007a30">5</span>No cues — ready for weights</div></div></div>
+        <div class="scale-box"><div class="sbt">Upper Body Scale</div><div class="sis"><div class="si"><span class="sn" style="background:#cc0000">1</span>Needs 1-on-1 help</div><div class="si"><span class="sn" style="background:#e05000">2</span>Few good reps, cues needed</div><div class="si"><span class="sn" style="background:#d4a000">3</span>No cues, not 5 quality reps</div><div class="si"><span class="sn" style="background:#5a9000">4</span>10 reps, no cues</div><div class="si"><span class="sn" style="background:#007a30">5</span>Elite — advance to loading</div></div></div>
+      </div>
+      <div class="panel sg"><div class="pt ptl">Squad Movement Scores — 2025/26</div><div class="tw"><table id="tbl-ms-ov"></table></div></div>
+      <div class="pg g2 sg">
+        <div class="panel"><div class="pt">Lower Body — Score Distribution</div><div class="cb"><canvas id="c-ms-lb"></canvas></div></div>
+        <div class="panel"><div class="pt">Upper Body — Score Distribution</div><div class="cb"><canvas id="c-ms-ub"></canvas></div></div>
+      </div>
+    </div>
+    <div class="msp" id="ms-entry">
+      <div class="ef"><div class="pt ptl">Log Movement Screen</div>
+        <div class="fgrid">
+          <div class="fg"><label>Player</label><select id="ms-ep"></select></div>
+          <div class="fg"><label>Date</label><input type="date" id="ms-ed" value="2026-05-01"/></div>
+          <div class="fg"><label>Session</label><select id="ms-es"><option>Morning</option><option>Afternoon</option><option>Pre-Match</option></select></div>
+        </div>
+        <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+          <div><div style="font-family:var(--font);font-size:12px;font-weight:800;text-transform:uppercase;color:var(--red);margin-bottom:8px;border-bottom:2px solid var(--border);padding-bottom:5px">Lower Body</div><div id="ms-lb-moves"></div></div>
+          <div><div style="font-family:var(--font);font-size:12px;font-weight:800;text-transform:uppercase;color:var(--red);margin-bottom:8px;border-bottom:2px solid var(--border);padding-bottom:5px">Upper Body</div><div id="ms-ub-moves"></div></div>
+        </div>
+        <div style="margin-top:10px"><label style="display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:3px;font-family:var(--font)">Notes</label><textarea class="nf" id="ms-notes" placeholder="Cues given, technique notes..."></textarea></div>
+        <button class="bsave" onclick="msSave()">Save Session</button>
+        <span id="ms-msg" style="display:none;margin-left:10px;font-size:12px;color:#007a30;font-weight:600">✓ Saved</span>
+      </div>
+      <div class="panel"><div class="pt ptl">Recent Sessions</div><div class="tw"><table id="tbl-ms-rec"></table></div></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ RANKINGS ═══ -->
+<div class="page" id="page-rank">
+  <div class="main">
+    <div class="ctrl-row">
+      <span class="cl">Age:</span>
+      <select class="ctrl" id="rank-age" onchange="renderRank()">
+        <option value="all">All Ages</option><option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option><option value="U16">U16</option><option value="U18">U18</option>
+      </select>
+      <span class="cl">Rank by:</span>
+      <select class="ctrl" id="rank-by" onchange="renderRank()">
+        <optgroup label="Sprint (Best Time)">
+          <option value="sprint-total">30m Total (fastest)</option>
+          <option value="sprint-s0_10">0-10m (fastest)</option>
+          <option value="sprint-s10_20">10-20m (fastest)</option>
+          <option value="sprint-s20_30">20-30m (fastest)</option>
+        </optgroup>
+        <optgroup label="5-0-5">
+          <option value="t505">5-0-5 Agility (fastest)</option>
+        </optgroup>
+        <optgroup label="CMJ">
+          <option value="cmj-height">CMJ Height (best)</option>
+          <option value="cmj-rsi">CMJ RSI-modified (best)</option>
+          <option value="cmj-power">CMJ Power/BM (best)</option>
+        </optgroup>
+        <optgroup label="NordBord">
+          <option value="nb-l">NordBord Left (strongest)</option>
+          <option value="nb-r">NordBord Right (strongest)</option>
+        </optgroup>
+        <optgroup label="Hip Strength">
+          <option value="hip-hab_l">Hip Abduction Left (strongest)</option>
+          <option value="hip-hab_r">Hip Abduction Right (strongest)</option>
+          <option value="hip-had_l">Hip Adduction Left (strongest)</option>
+          <option value="hip-had_r">Hip Adduction Right (strongest)</option>
+          <option value="hip-hab_total">Hip Abduction Combined (L+R)</option>
+          <option value="hip-had_total">Hip Adduction Combined (L+R)</option>
+        </optgroup>
+        <optgroup label="NordBord Combined">
+          <option value="nb-total">NordBord Combined L+R (strongest)</option>
+        </optgroup>
+      </select>
+    </div>
+    <div class="tw"><table id="tbl-rank"></table></div>
+  </div>
+</div>
+
+
+<!-- Loading overlay -->
+<div id="loader-overlay" style="position:fixed;inset:0;background:rgba(10,10,10,.85);z-index:9999;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px">
+  <div style="width:44px;height:44px;border:4px solid rgba(255,255,255,.15);border-top-color:#cc0000;border-radius:50%;animation:spin 0.8s linear infinite"></div>
+  <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:1px">LOADING DATA…</div>
+  <style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+</div>
+
+<script>
+// ── API CONFIG ────────────────────────────────────────────────────
+const API = '';  // same origin on Vercel; set to your URL for external use
+
+// ── LIVE DATA STATE ───────────────────────────────────────────────
+let PLAYERS = [], GPS = {}, PM = {}, LATEST = {}, ALL_DATES = [], MATCH_LIST = [], TEAM_WEEKLY = {}, WEEK_KEYS = [];
+let CMJ = {}, NB = {}, VALD = {}, SPRINT = {}, T505 = {}, BROAD = {}, MAS_DATA = {}, MS_SESSIONS_LIVE = [];
+let GYM_LB = {}, GYM_UB = {};
+
+function showLoader(){document.getElementById('loader-overlay').style.display='flex';}
+function hideLoader(){document.getElementById('loader-overlay').style.display='none';}
+
+async function loadAllData(){
+  showLoader();
+  try {
+    const [gpsRes,cmjRes,nbRes,hipRes,sprintRes,t505Res,broadRes,masRes,movRes] = await Promise.allSettled([
+      fetch(API+'/api/gps').then(r=>r.json()),
+      fetch(API+'/api/cmj').then(r=>r.json()),
+      fetch(API+'/api/nordbord').then(r=>r.json()),
+      fetch(API+'/api/hipforce').then(r=>r.json()),
+      fetch(API+'/api/sprint').then(r=>r.json()),
+      fetch(API+'/api/505').then(r=>r.json()),
+      fetch(API+'/api/broad').then(r=>r.json()),
+      fetch(API+'/api/mas').then(r=>r.json()),
+      fetch(API+'/api/movement').then(r=>r.json()),
+    ]);
+    if(gpsRes.status==='fulfilled'&&!gpsRes.value.error){
+      const d=gpsRes.value;
+      PLAYERS=d.players||[]; GPS=d.gps||{}; PM=d.pos_map||{};
+      LATEST=d.latest||{}; ALL_DATES=d.all_dates||[];
+      MATCH_LIST=d.match_list||[]; TEAM_WEEKLY=d.team_weekly||{}; WEEK_KEYS=d.week_keys||[];
+    } else {console.warn('GPS unavailable',gpsRes.reason||gpsRes.value?.error);}
+    if(cmjRes.status==='fulfilled'&&!cmjRes.value?.error) CMJ=cmjRes.value;
+    if(nbRes.status==='fulfilled'&&!nbRes.value?.error)   NB=nbRes.value;
+    if(hipRes.status==='fulfilled'&&!hipRes.value?.error)  VALD=hipRes.value;
+    if(sprintRes.status==='fulfilled'&&!sprintRes.value?.error) SPRINT=sprintRes.value;
+    if(t505Res.status==='fulfilled'&&!t505Res.value?.error)     T505=t505Res.value;
+    if(broadRes.status==='fulfilled'&&!broadRes.value?.error)   BROAD=broadRes.value;
+    if(masRes.status==='fulfilled'&&!masRes.value?.error)       MAS_DATA=masRes.value;
+    if(movRes.status==='fulfilled'&&!movRes.value?.error)       MS_SESSIONS_LIVE=movRes.value;
+    document.getElementById('last-updated').textContent='Updated: '+new Date().toLocaleTimeString();
+  } catch(err){
+    document.getElementById('loader-overlay').innerHTML=`<div style="text-align:center;color:#fff"><div style="font-size:18px;font-weight:700;margin-bottom:8px">⚠ Could not load data</div><div style="font-size:13px;opacity:.7">${err.message}</div><button onclick="loadAllData()" style="margin-top:14px;padding:8px 20px;background:#cc0000;color:#fff;border:none;border-radius:3px;cursor:pointer;font-weight:700">Retry</button></div>`;
+    return;
+  }
+  hideLoader();
+  setupDateFilter();
+  initDaily(); DONE['daily']=true;
+}
+
+// ── CONSTANTS ─────────────────────────────────────────────────────
+const PC={CB:'#b0b0b0',FW:'#e8a0a8',FB:'#444',GK:'#1a1a1a',MF:'#cc0000'};
+const PH={CB:'#888',FW:'#c07080',FB:'#222',GK:'#000',MF:'#990000'};
+const MC={dist:{c:'#cc0000',bg:'rgba(204,0,0,0.18)'},dpm:{c:'#990000',bg:'rgba(153,0,0,0.18)'},hsr:{c:'#444',bg:'rgba(68,68,68,0.18)'},sprint:{c:'#444',bg:'rgba(68,68,68,0.18)'},expl:{c:'#cc0000',bg:'rgba(204,0,0,0.18)'},maxspd:{c:'#990000',bg:'rgba(153,0,0,0.18)'},acc:{c:'#cc0000',bg:'rgba(204,0,0,0.18)'},dec:{c:'#444',bg:'rgba(68,68,68,0.18)'}};
+const MD_DAYS=['MD-5','MD-4','MD-3','MD-2','MD-1','MD','MD+1'];
+const MAS = MAS_DATA;
+
+
+// ── DATE FILTER SETUP ────────────────────────────────────────────
+function setupDateFilter(){
+  const sel = document.getElementById('g-date');
+  if(sel.options.length > 0) return;
+  // Get all unique dates from GPS
+  const dates = new Set();
+  PLAYERS.forEach(p => {(GPS[p]||[]).forEach(s => {if(s.dist) dates.add(s.date);});});
+  const sorted = [...dates].sort().reverse();
+  sorted.forEach(d => {const o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+  // Default to most recent
+  if(sorted.length) sel.value = sorted[0];
+}
+
+// ── NAV ──────────────────────────────────────────────────────────
+const DONE={};
+const INITS={daily:initDaily,matchday:initMatchday,teamday:initTeamday,teamweek:initTeamweek,playerday:initPlayerday,playerweek:initPlayerweek,mdpm:initMdpm,vald:initVald,testing:initTesting,movement:initMovement,rank:initRankings};
+document.querySelectorAll('.nav-tab').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.nav-tab').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('page-'+t.dataset.p).classList.add('active');if(!DONE[t.dataset.p]){DONE[t.dataset.p]=true;INITS[t.dataset.p]&&INITS[t.dataset.p]();}});});
+document.querySelectorAll('.mst').forEach(t=>{t.addEventListener('click',()=>{document.querySelectorAll('.mst').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.msp').forEach(x=>x.classList.remove('active'));t.classList.add('active');document.getElementById('ms-'+t.dataset.ms).classList.add('active');});});
+function filterAge(){}
+function populateDropdown(id){const sel=document.getElementById(id);if(!sel||sel.options.length)return;PLAYERS.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=`${p} (${PM[p]||'?'})`;sel.appendChild(o);});}
+
+// ── DAILY ────────────────────────────────────────────────────────
+function initDaily(){
+  setupDateFilter();
+  const selDate = document.getElementById('g-date').value;
+  const pos = document.getElementById('g-pos').value;
+  const ageDaily = document.getElementById('g-age-daily')?.value||'all';
+  // Get all players who have a session on this date
+  let data = [];
+  PLAYERS.forEach(p => {
+    const sess = (GPS[p]||[]).find(s => s.date === selDate && s.dist);
+    if(sess) data.push({...sess, player:p, pos: PM[p]||'MF'});
+  });
+  if(ageDaily !== 'all') data = data.filter(d => {
+    // Find player age from any VALD or CMJ data
+    const cmjArr = CMJ[d.player]||[];
+    const age = cmjArr.length ? cmjArr[cmjArr.length-1].age : (NB[d.player]||[])[0]?.age || null;
+    return age === ageDaily;
+  });
+  if(pos !== 'all') data = data.filter(d => d.pos === pos);
+  if(!data.length){
+    // Fallback to latest sessions
+    data = Object.values(LATEST).filter(d => d.dist);
+    if(pos!=='all') data = data.filter(d => d.pos===pos);
+  }
+  data = data.filter(d=>d.dist).sort((a,b)=>b.dist-a.dist);
+  // KPIs
+  const kpis=[{k:'dist',l:'Avg Distance (m)'},{k:'dpm',l:'Avg Dist/Min'},{k:'hsr',l:'Avg HSR (m)'},{k:'sprint',l:'Avg Sprint'},{k:'expl',l:'Avg Explosive'},{k:'acc',l:'Avg Accels'},{k:'dec',l:'Avg Decels'}];
+  document.getElementById('daily-kpis').innerHTML=kpis.map(({k,l})=>{const a=avg(data.map(d=>d[k]));return `<div><div class="kv">${a}</div><div class="kl">${l}</div></div>`;}).join('');
+  // Charts
+  ['dist','dpm','hsr','sprint','expl','maxspd','acc','dec'].forEach(key=>{
+    const sorted=[...data].filter(d=>d[key]!=null).sort((a,b)=>b[key]-a[key]);
+    mkBarM('c-'+key,sorted.map(d=>d.player.split(' ')[0]),sorted.map(d=>d[key]),sorted.map(d=>PC[d.pos]||'#888'),sorted.map(d=>(PC[d.pos]||'#888')+'55'));
+  });
+}
+
+// ── MATCH DAY ────────────────────────────────────────────────────
+function initMatchday(){
+  const sel=document.getElementById('md-sel');
+  if(!sel.options.length){MATCH_LIST.forEach(([date,info],i)=>{const o=document.createElement('option');o.value=i;o.textContent=`${date} — ${info.label}`;sel.appendChild(o);});}
+  sel.onchange=()=>renderGauges(+sel.value);
+  document.getElementById('md-load').onchange=()=>renderGauges(+sel.value);
+  renderGauges(MATCH_LIST.length-1);
+}
+function renderGauges(idx){
+  if(idx<0||idx>=MATCH_LIST.length)return;
+  const [date,info]=MATCH_LIST[idx];
+  const loadFilter = document.getElementById('md-load').value;
+  let mdData = info.data;
+  if(loadFilter==='full') mdData = mdData.filter(d=>d.mins && d.mins>=60);
+  else if(loadFilter==='under') mdData = mdData.filter(d=>d.mins && d.mins<60);
+  const metrics=['dist','dpm','hsr','sprint','expl','acc','dec'];
+  const mLabels=['Total Distance','Dist / Min','HSR','Sprint','Explosive','Accels','Decels'];
+  const mUnits=['m','m/min','m','m','m','',''];
+  const allMatchAvg=k=>{const all=MATCH_LIST.flatMap(([,inf])=>inf.data.map(d=>d[k])).filter(x=>x!=null);return all.length?+(avg(all)).toFixed(1):0;};
+  const allMatchMax=k=>{const all=MATCH_LIST.flatMap(([,inf])=>inf.data.map(d=>d[k])).filter(x=>x!=null);return all.length?Math.round(Math.max(...all)):0;};
+  const matchMetricAvg=k=>{const vals=mdData.map(d=>d[k]).filter(x=>x!=null);return vals.length?+(avg(vals)).toFixed(1):0;};
+  document.getElementById('gauges').innerHTML=metrics.map((m,i)=>{
+    const cur=parseFloat(matchMetricAvg(m))||0;
+    const seasonAvg=parseFloat(allMatchAvg(m))||1;
+    const mx=parseFloat(allMatchMax(m))||1;
+    const col=MC[m]?.c||'#cc0000';
+    const pctCur=Math.min(cur/mx*100,100).toFixed(1);
+    const pctAvg=Math.min(seasonAvg/mx*100,100).toFixed(1);
+    const diff=cur-seasonAvg;
+    const diffStr=(diff>=0?'+':'')+diff.toFixed(1);
+    const diffCol=diff>=0?'#007a30':'#cc0000';
+    return `<div class="gauge-card" style="width:100%;max-width:240px;padding:12px 14px 10px">
+      <div class="gname">${mLabels[i]}</div>
+      <div style="font-family:var(--font);font-size:32px;font-weight:800;color:${col};line-height:1;margin:4px 0 2px">${cur}</div>
+      <div style="font-size:10px;color:#888;margin-bottom:10px">${mUnits[i]||'count'} · <span style="color:${diffCol};font-weight:700">${diffStr} vs season avg</span></div>
+      <div style="margin-bottom:6px">
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:#888;margin-bottom:2px"><span>This match</span><span>${cur}</span></div>
+        <div style="height:8px;background:#eee;border-radius:4px;overflow:hidden"><div style="height:100%;width:${pctCur}%;background:${col};border-radius:4px;transition:width .4s"></div></div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;font-size:9px;color:#888;margin-bottom:2px"><span>Season avg</span><span>${seasonAvg}</span></div>
+        <div style="height:6px;background:#eee;border-radius:4px;overflow:hidden"><div style="height:100%;width:${pctAvg}%;background:#ff9500;border-radius:4px;transition:width .4s"></div></div>
+      </div>
+      <div style="margin-top:6px;font-size:9px;color:#aaa;text-align:right">Max: ${mx}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── PLAYER/SESSION ───────────────────────────────────────────────
+function initTeamday(){populateDropdown('td-player');document.getElementById('td-player').onchange=renderTeamDay;document.getElementById('td-n').onchange=renderTeamDay;renderTeamDay();}
+function renderTeamDay(){
+  const player=document.getElementById('td-player').value;
+  const nVal=document.getElementById('td-n').value;
+  let sessions=(GPS[player]||[]).filter(s=>s.dist);
+  if(nVal==='7'){
+    const cutoff=new Date();cutoff.setDate(cutoff.getDate()-7);
+    sessions=sessions.filter(s=>new Date(s.date)>=cutoff);
+  } else {
+    sessions=sessions.slice(-+nVal);
+  }
+  const labels=sessions.map(s=>s.date.slice(5));
+  ['dist','dpm','hsr','sprint','expl','maxspd','acc','dec'].forEach(k=>{mkBar('c-td-'+k,labels,sessions.map(s=>s[k]??null),MC[k]?.c||'#cc0000',MC[k]?.bg);});
+}
+
+// ── TEAM/WEEK ────────────────────────────────────────────────────
+function initTeamweek(){
+  const labels=WEEK_KEYS.map(k=>k.slice(5));
+  ['dist','dpm','hsr','sprint','expl','maxspd','acc','dec'].forEach(k=>{
+    mkBar('c-tw-'+k,labels,WEEK_KEYS.map(wk=>TEAM_WEEKLY[wk]?.[k]??null),MC[k]?.c||'#cc0000',MC[k]?.bg);
+  });
+}
+
+// ── PLAYER/DAY ───────────────────────────────────────────────────
+function initPlayerday(){populateDropdown('pd-player');document.getElementById('pd-player').onchange=renderPlayerDay;document.getElementById('pd-n').onchange=renderPlayerDay;renderPlayerDay();}
+function renderPlayerDay(){
+  const player=document.getElementById('pd-player').value;
+  const nVal=document.getElementById('pd-n').value;
+  let sessions=(GPS[player]||[]).filter(s=>s.dist);
+  if(nVal==='7'){
+    const cutoff=new Date();cutoff.setDate(cutoff.getDate()-7);
+    sessions=sessions.filter(s=>new Date(s.date)>=cutoff);
+  } else {
+    sessions=sessions.slice(-+nVal);
+  }
+  const labels=sessions.map(s=>s.date.slice(5));
+  ['dist','dpm','hsr','sprint','expl','maxspd','acc','dec'].forEach(k=>{mkBar('c-pd-'+k,labels,sessions.map(s=>s[k]??null),MC[k]?.c||'#cc0000',MC[k]?.bg);});
+}
+
+// ── PLAYER/WEEK ──────────────────────────────────────────────────
+function initPlayerweek(){populateDropdown('pw-player');document.getElementById('pw-player').onchange=renderPlayerWeek;renderPlayerWeek();}
+function renderPlayerWeek(){
+  const player=document.getElementById('pw-player').value;
+  const sessions=(GPS[player]||[]).filter(s=>s.dist);
+  const weekly={};
+  sessions.forEach(s=>{const d=new Date(s.date);const wk=`${d.getFullYear()}-W${String(d.getMonth()*4+Math.ceil(d.getDate()/7)).padStart(2,'0')}`;if(!weekly[wk])weekly[wk]={};['dist','dpm','hsr','sprint','expl','maxspd','acc','dec'].forEach(k=>{if(s[k]!=null){if(!weekly[wk][k])weekly[wk][k]=[];weekly[wk][k].push(s[k]);}});});
+  const wkeys=Object.keys(weekly).sort().slice(-12);const labels=wkeys.map(k=>k.slice(5));
+  ['dist','dpm','hsr','sprint','expl','maxspd','acc','dec'].forEach(k=>{mkBar('c-pw-'+k,labels,wkeys.map(wk=>weekly[wk]?.[k]?+(avg(weekly[wk][k])).toFixed(1):null),MC[k]?.c||'#cc0000',MC[k]?.bg);});
+}
+
+// ── MD+/- ────────────────────────────────────────────────────────
+function initMdpm(){const sel=document.getElementById('mdpm-player');if(!sel.options.length)PLAYERS.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});sel.onchange=renderMdpm;renderMdpm();}
+function renderMdpm(){
+  const player=document.getElementById('mdpm-player').value;
+  const sessions=(GPS[player]||[]).filter(s=>s.dist&&s.md);
+  const mdGroups={'MD-5':[],'MD-4':[],'MD-3':[],'MD-2':[],'MD-1':[],'MD':[],'MD+1':[]};
+  sessions.forEach(s=>{const md=String(s.md).trim();if(mdGroups[md])mdGroups[md].push(s);});
+  const cc=d=>d==='MD'?'#1a1a1a':d.includes('+')?'#990000':'#cc0000';
+  const distAvgs=MD_DAYS.map(d=>mdGroups[d]?.length?Math.round(avg(mdGroups[d].map(s=>s.dist))):null);
+  document.getElementById('mdpm-chips').innerHTML=MD_DAYS.map((d,i)=>`<div class="md-chip" style="border-top-color:${cc(d)}"><div class="mcd" style="color:${cc(d)}">${d}</div><div class="mcv" style="color:${cc(d)}">${distAvgs[i]||'—'}</div><div class="mcu">m avg</div></div>`).join('');
+  ['dist','hsr','sprint','expl','acc','dec'].forEach(k=>{
+    const avgs=MD_DAYS.map(d=>mdGroups[d]?.length?Math.round(avg(mdGroups[d].map(s=>s[k]).filter(x=>x!=null))):null);
+    const mdAvg=avg(avgs.filter(x=>x!=null))||0;
+    mkBarLine('c-mdpm-'+k,MD_DAYS,avgs,Array(7).fill(Math.round(mdAvg)),MC[k]?.c||'#cc0000');
+  });
+}
+
+// ── VALD ─────────────────────────────────────────────────────────
+function initVald(){
+  const sel=document.getElementById('vald-player');
+  if(!sel.options.length){
+    // Populate from CMJ (most players have CMJ data)
+    const allNames = new Set([...Object.keys(CMJ),...Object.keys(NB),...Object.keys(VALD)]);
+    [...allNames].sort().forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
+  }
+  sel.onchange=renderVald;document.getElementById('vald-age-f').onchange=renderVald;
+  renderVald();
+}
+function vasym(l,r){if(!l||!r)return 0;return+(Math.abs(l-r)/Math.max(l,r)*100).toFixed(1)}
+function vbcls(a){return a>10?'vbr':a>5?'vby':'vbg'}
+function vmtable(l,r,lbl){const asym=vasym(l,r);const lp=l&&r?Math.round(l/(l+r)*100):50;return `<table class="mt"><thead><tr><th>${lbl}</th><th style="color:#ccc">Left (N)</th><th style="color:#cc4444">Right (N)</th><th>Asymm</th><th style="min-width:100px">L/R</th></tr></thead><tbody><tr><td style="font-weight:600">Latest</td><td style="font-family:var(--font);font-size:14px;font-weight:700;color:#ddd">${l?.toFixed(1)||'—'}</td><td style="font-family:var(--font);font-size:14px;font-weight:700;color:#cc4444">${r?.toFixed(1)||'—'}</td><td>${l&&r?`<span class="${vbcls(asym)}">${asym}%</span>`:'—'}</td><td>${l&&r?`<div class="vax"><span class="vaxl" style="text-align:right">${lp}%</span><div class="vaxT"><div class="vaxL" style="width:${lp}%"></div><div class="vaxR" style="width:${100-lp}%"></div></div><span class="vaxl" style="color:#cc4444">${100-lp}%</span></div>`:'—'}</td></tr></tbody></table>`;}
+function renderVald(){
+  const pn=document.getElementById('vald-player').value;
+  const dateRange=document.getElementById('vald-date-range')?.value||'all';
+  function filterByRange(arr){
+    if(!arr||!arr.length)return arr||[];
+    if(dateRange==='all')return arr;
+    if(dateRange==='latest')return [arr[arr.length-1]];
+    return arr.filter(r=>r.date&&r.date.startsWith(dateRange));
+  }
+  const cmjData=filterByRange(CMJ[pn]||[]);
+  const nbData=filterByRange(NB[pn]||[]);
+  const hipData=filterByRange(VALD[pn]||[]);
+  const ll=arr=>arr[arr.length-1];
+  const cmjDates=cmjData.map(r=>r.date.slice(5));
+  const nbDates=nbData.map(r=>r.date.slice(5));
+  const hipDates=hipData.map(r=>r.date.slice(5));
+  const latestCMJ=ll(cmjData)||{};const latestNB=ll(nbData)||{};const latestHip=ll(hipData)||{};
+  document.getElementById('vald-dash').innerHTML=`
+    <div class="vp vpf">
+      <div class="vpt">CMJ <span>— ${pn}</span></div>
+      <div class="vleg"><div class="vli"><div class="vld" style="background:#444;border:1px solid #999"></div>Jump Height (cm)</div><div class="vli"><div class="vld" style="background:#cc0000"></div>RSI-modified</div></div>
+      <div style="position:relative;height:190px"><canvas id="vc-cmj"></canvas></div>
+      ${cmjData.length?`<table class="mt" style="margin-top:8px"><thead><tr><th>Latest Height (cm)</th><th style="color:#cc6666">Latest RSI-mod</th><th>Peak Power/BM</th></tr></thead><tbody><tr><td style="font-family:var(--font);font-size:16px;font-weight:800;color:#ddd">${latestCMJ.height||'—'}</td><td style="font-family:var(--font);font-size:16px;font-weight:800;color:#cc6666">${latestCMJ.rsi||'—'}</td><td style="font-family:var(--font);font-size:16px;font-weight:800;color:#aaa">${latestCMJ.power||'—'}</td></tr></tbody></table>`:'<div style="color:#666;padding:10px">No CMJ data available</div>'}
+    </div>
+    <div class="vp">
+      <div class="vpt">NordBord Isoprone 30</div>
+      <div class="vleg"><div class="vli"><div class="vld" style="background:#1a1a1a;border:1px solid #555"></div>Left (N)</div><div class="vli"><div class="vld" style="background:#cc0000"></div>Right (N)</div></div>
+      <div style="position:relative;height:180px"><canvas id="vc-nb"></canvas></div>
+      ${nbData.length?vmtable(latestNB.l,latestNB.r,'NordBord'):'<div style="color:#666;padding:10px">No data</div>'}
+    </div>
+    <div class="vp">
+      <div class="vpt">Hip Abduction</div>
+      <div class="vleg"><div class="vli"><div class="vld" style="background:#444;border:1px solid #999"></div>Left (N)</div><div class="vli"><div class="vld" style="background:#cc0000"></div>Right (N)</div></div>
+      <div style="position:relative;height:180px"><canvas id="vc-hab"></canvas></div>
+      ${hipData.length?vmtable(latestHip.hab_l,latestHip.hab_r,'Hip Abduction'):'<div style="color:#666;padding:10px">No data</div>'}
+    </div>
+    <div class="vp">
+      <div class="vpt">Hip Adduction</div>
+      <div class="vleg"><div class="vli"><div class="vld" style="background:#444;border:1px solid #999"></div>Left (N)</div><div class="vli"><div class="vld" style="background:#cc0000"></div>Right (N)</div></div>
+      <div style="position:relative;height:180px"><canvas id="vc-had"></canvas></div>
+      ${hipData.length?vmtable(latestHip.had_l,latestHip.had_r,'Hip Adduction'):'<div style="color:#666;padding:10px">No data</div>'}
+    </div>`;
+  // CMJ dual-axis bar
+  if(cmjData.length) mkCMJ('vc-cmj',cmjDates,cmjData.map(r=>r.height),cmjData.map(r=>r.rsi));
+  // NordBord grouped bars
+  if(nbData.length) mkGrpBar('vc-nb',nbDates,[{label:'Left',data:nbData.map(r=>r.l),backgroundColor:'#444',borderColor:'#222',borderWidth:1,borderRadius:2},{label:'Right',data:nbData.map(r=>r.r),backgroundColor:'#cc0000',borderColor:'#990000',borderWidth:1,borderRadius:2}],false);
+  // Hip Ab
+  if(hipData.length) mkGrpBar('vc-hab',hipDates,[{label:'Left',data:hipData.map(r=>r.hab_l),backgroundColor:'#444',borderColor:'#222',borderWidth:1,borderRadius:2},{label:'Right',data:hipData.map(r=>r.hab_r),backgroundColor:'#cc0000',borderColor:'#990000',borderWidth:1,borderRadius:2}],false);
+  // Hip Ad
+  if(hipData.length) mkGrpBar('vc-had',hipDates,[{label:'Left',data:hipData.map(r=>r.had_l),backgroundColor:'#444',borderColor:'#222',borderWidth:1,borderRadius:2},{label:'Right',data:hipData.map(r=>r.had_r),backgroundColor:'#cc0000',borderColor:'#990000',borderWidth:1,borderRadius:2}],false);
+}
+
+// ── TESTING ──────────────────────────────────────────────────────
+function initTesting(){
+  // Nothing auto-renders — wait for user to pick a test
+}
+function onTestChange(){
+  const val = document.getElementById('test-sort').value;
+  const sprintSection = document.getElementById('test-sprint-section');
+  const masSection = document.getElementById('test-mas-section');
+  const placeholder = document.getElementById('test-placeholder');
+
+  // Hide all, show relevant
+  sprintSection.style.display = 'none';
+  masSection.style.display = 'none';
+  placeholder.style.display = 'none';
+
+  if(!val) {
+    placeholder.style.display = 'block';
+    return;
+  }
+  if(val === 'mas') {
+    masSection.style.display = 'block';
+    renderMAS();
+  } else {
+    sprintSection.style.display = 'block';
+    renderTesting();
+  }
+}
+function renderTesting(){
+  const ageEl=document.getElementById('test-age');
+  const selectedOpts=[...ageEl.selectedOptions].map(o=>o.value);
+  const ageF=selectedOpts.includes('all')||selectedOpts.length===0?'all':selectedOpts;
+  function ageMatch(age){return ageF==='all'||ageF.includes(age);}
+  const sortBy=document.getElementById('test-sort').value;
+  if(!sortBy || sortBy === 'mas') return;
+
+  // Update sprint chart title to reflect selected metric
+  const titles = {total:'30m Sprint — Total Time',s0_10:'0–10m Sprint Split',s10_20:'10–20m Sprint Split',s20_30:'20–30m Sprint Split',t505:'5-0-5 Agility'};
+  document.getElementById('sprint-chart-title').textContent = titles[sortBy] || '30m Sprint';
+
+  let sprintPlayers=Object.entries(SPRINT).map(([name,arr])=>{
+    const best=[...arr].sort((a,b)=>a.total-b.total)[0];
+    return{name,age:best.age,...best};
+  });
+  if(ageF!=='all') sprintPlayers=sprintPlayers.filter(p=>ageMatch(p.age));
+  const t505map={};Object.entries(T505).forEach(([n,arr])=>{const best=[...arr].sort((a,b)=>a.time-b.time)[0];t505map[n]=best;});
+  const broadMap=BROAD;
+  if(sortBy==='total') sprintPlayers.sort((a,b)=>a.total-b.total);
+  else if(sortBy==='s0_10') sprintPlayers.sort((a,b)=>a.s0_10-b.s0_10);
+  else if(sortBy==='s10_20') sprintPlayers.sort((a,b)=>a.s10_20-b.s10_20);
+  else if(sortBy==='s20_30') sprintPlayers.sort((a,b)=>a.s20_30-b.s20_30);
+  else if(sortBy==='t505'){
+    const t505players=Object.entries(T505).map(([n,arr])=>{const best=[...arr].sort((a,b)=>a.time-b.time)[0];return{name:n,age:best.age,...best};});
+    const sorted=t505players.filter(p=>ageMatch(p.age)).sort((a,b)=>a.time-b.time);
+    const names=sorted.map(p=>p.name.split(' ')[0]);
+    mkBar('c-test-total',names,sorted.map(p=>p.time),'#cc0000','rgba(204,0,0,0.18)');
+    mkBar('c-test-0_10',names,sorted.map(p=>null),'#444','rgba(68,68,68,0.18)');
+    mkBar('c-test-10_20',names,sorted.map(p=>null),'#444','rgba(68,68,68,0.18)');
+    mkBar('c-test-20_30',names,sorted.map(p=>null),'#990000','rgba(153,0,0,0.18)');
+    renderTestingTable(sorted,broadMap,t505map);
+    return;
+  }
+  const names=sprintPlayers.map(p=>p.name.split(' ')[0]);
+  mkBar('c-test-total',names,sprintPlayers.map(p=>p.total),'#cc0000','rgba(204,0,0,0.18)');
+  mkBar('c-test-0_10',names,sprintPlayers.map(p=>p.s0_10),'#444','rgba(68,68,68,0.18)');
+  mkBar('c-test-10_20',names,sprintPlayers.map(p=>p.s10_20),'#990000','rgba(153,0,0,0.18)');
+  mkBar('c-test-20_30',names,sprintPlayers.map(p=>p.s20_30),'#444','rgba(68,68,68,0.18)');
+  renderTestingTable(sprintPlayers,broadMap,t505map);
+}
+function renderTestingTable(sprintData,broadMap,t505map){
+  document.getElementById('tbl-testing').innerHTML=
+    `<thead><tr><th>Player</th><th>Age</th><th>Pos</th><th>Broad Jump</th><th>0-10m</th><th>10-20m</th><th>20-30m</th><th>0-30m Total</th><th>5-0-5</th></tr></thead><tbody>`+
+    sprintData.map(p=>{
+      const shortName=p.name.split(' ')[0];
+      const broad=broadMap[shortName]||broadMap[p.name]||{dist:'—'};
+      const t505=t505map[p.name]||t505map[shortName];
+      const pos=PM[p.name]||'?';
+      return `<tr>
+        <td style="font-weight:600">${p.name}</td>
+        <td>${ageBadge(p.age)}</td>
+        <td>${posBadge(pos)}</td>
+        <td style="font-family:var(--font);font-size:14px;font-weight:700;color:#cc0000">${broad.dist||'—'}</td>
+        <td style="font-family:var(--font);font-size:13px;font-weight:700">${p.s0_10?.toFixed(3)||'—'}s</td>
+        <td style="font-family:var(--font);font-size:13px;font-weight:700">${p.s10_20?.toFixed(3)||'—'}s</td>
+        <td style="font-family:var(--font);font-size:13px;font-weight:700">${p.s20_30?.toFixed(3)||'—'}s</td>
+        <td style="font-family:var(--font);font-size:14px;font-weight:800;color:#cc0000">${p.total?.toFixed(3)||'—'}s</td>
+        <td style="font-family:var(--font);font-size:14px;font-weight:700">${t505?t505.time.toFixed(3)+'s':'—'}</td>
+      </tr>`;
+    }).join('')+'</tbody>';
+}
+
+
+// ── MAS ──────────────────────────────────────────────────────────
+function renderMAS(){
+  const ageF = document.getElementById('test-age').value;
+  const sortBy = document.getElementById('mas-sort').value;
+  const dateF = document.getElementById('mas-date').value;
+
+  // Build player list from MAS data
+  let players = Object.entries(MAS).map(([name, records]) => {
+    let rec;
+    if(dateF === 'best') {
+      rec = [...records].sort((a,b) => b.mas - a.mas)[0];
+    } else {
+      rec = records.find(r => r.date === dateF) || null;
+    }
+    if(!rec) return null;
+    if(ageF !== 'all' && rec.age !== ageF) return null;
+    return { name, ...rec, pos: PM[name] || '?' };
+  }).filter(Boolean);
+
+  // Sort
+  if(sortBy === 'mas') players.sort((a,b) => b.mas - a.mas);
+  else if(sortBy === 'dist') players.sort((a,b) => b.dist - a.dist);
+  else players.sort((a,b) => a.name.localeCompare(b.name));
+
+  const names = players.map(p => p.name.split(' ')[0]);
+  const masVals = players.map(p => p.mas);
+  const distVals = players.map(p => p.dist);
+  const posColors = players.map(p => PC[p.pos] || '#888');
+  const posBgs = players.map(p => (PC[p.pos] || '#888') + '55');
+
+  mkBarM('c-mas-score', names, masVals, posColors, posBgs);
+  mkBarM('c-mas-dist', names, distVals, posColors, posBgs);
+
+  // MAS benchmark color bands
+  function masColor(v) {
+    if(v >= 5.0) return '#007a30';
+    if(v >= 4.5) return '#5a9000';
+    if(v >= 4.0) return '#d4a000';
+    if(v >= 3.5) return '#e05000';
+    return '#cc0000';
+  }
+  function masLabel(v) {
+    if(v >= 5.0) return 'Elite';
+    if(v >= 4.5) return 'Good';
+    if(v >= 4.0) return 'Average';
+    if(v >= 3.5) return 'Below Avg';
+    return 'Poor';
+  }
+
+  document.getElementById('tbl-mas').innerHTML =
+    `<thead><tr>
+      <th>Player</th><th>Age</th><th>Pos</th><th>Test Date</th>
+      <th>Distance (m)</th><th>Time (s)</th>
+      <th>MAS Score</th><th>Level</th>
+    </tr></thead><tbody>` +
+    players.map((p,i) => {
+      const rank = i + 1;
+      return `<tr>
+        <td style="font-weight:600">${p.name}</td>
+        <td><span class="badge bgy">${p.age}</span></td>
+        <td>${posBadge(p.pos)}</td>
+        <td style="color:#888">${p.date}</td>
+        <td style="font-family:var(--font);font-size:14px;font-weight:700">${p.dist}</td>
+        <td style="color:#888">${p.time}s</td>
+        <td>
+          <span style="font-family:var(--font);font-size:18px;font-weight:800;color:${masColor(p.mas)}">${p.mas}</span>
+          <span style="font-size:10px;color:#888;margin-left:4px">m/s</span>
+        </td>
+        <td><span style="background:${masColor(p.mas)};color:#fff;padding:2px 8px;border-radius:3px;font-family:var(--font);font-size:11px;font-weight:700">${masLabel(p.mas)}</span></td>
+      </tr>`;
+    }).join('') + '</tbody>';
+}
+
+// ── RANKINGS ─────────────────────────────────────────────────────
+function initRankings(){renderRank();}
+function renderRank(){
+  const ageF=document.getElementById('rank-age').value;
+  const rankBy=document.getElementById('rank-by').value;
+  const [cat,key]=rankBy.split('-');
+  let ranked=[];
+  function filterAge(age){return ageF==='all'||age===ageF;}
+  if(cat==='sprint'){
+    ranked=Object.entries(SPRINT).filter(([n,arr])=>filterAge(arr[0]?.age)).map(([n,arr])=>{const best=[...arr].sort((a,b)=>a[key]-b[key])[0];return{name:n,age:best.age,pos:PM[n]||'?',val:best[key]||99};}).filter(r=>r.val<99).sort((a,b)=>a.val-b.val).map((r,i)=>({...r,rank:i+1,str:r.val.toFixed(3)+'s',lower:true}));
+  } else if(cat==='t505'){
+    ranked=Object.entries(T505).filter(([n,arr])=>filterAge(arr[0]?.age)).map(([n,arr])=>{const best=[...arr].sort((a,b)=>a.time-b.time)[0];return{name:n,age:best.age,pos:PM[n]||'?',val:best.time};}).filter(r=>r.val).sort((a,b)=>a.val-b.val).map((r,i)=>({...r,rank:i+1,str:r.val.toFixed(3)+'s',lower:true}));
+  } else if(cat==='cmj'){
+    ranked=Object.entries(CMJ).filter(([n,arr])=>filterAge(arr[0]?.age)).map(([n,arr])=>{const best=[...arr].sort((a,b)=>b[key]-a[key])[0];return{name:n,age:best.age,pos:PM[n]||'?',val:best[key]||0};}).filter(r=>r.val>0).sort((a,b)=>b.val-a.val).map((r,i)=>({...r,rank:i+1,str:key==='rsi'?r.val.toFixed(3):r.val.toFixed(1)+(key==='height'?' cm':' W/kg')}));
+  } else if(cat==='nb'){
+    ranked=Object.entries(NB).filter(([n,arr])=>filterAge(arr[0]?.age)).map(([n,arr])=>{const best=[...arr].sort((a,b)=>b[key]-a[key])[0];return{name:n,age:best.age,pos:PM[n]||'?',val:best[key]||0};}).filter(r=>r.val>0).sort((a,b)=>b.val-a.val).map((r,i)=>({...r,rank:i+1,str:r.val.toFixed(1)+' N'}));
+  } else if(cat==='hip'){
+    if(key==='hab_total'){
+      ranked=Object.entries(VALD).filter(([n,arr])=>filterAge(arr[0]?.age)).map(([n,arr])=>{const best=[...arr].sort((a,b)=>((b.hab_l||0)+(b.hab_r||0))-((a.hab_l||0)+(a.hab_r||0)))[0];const tot=(best.hab_l||0)+(best.hab_r||0);return{name:n,age:best.age,pos:PM[n]||'?',val:tot};}).filter(r=>r.val>0).sort((a,b)=>b.val-a.val).map((r,i)=>({...r,rank:i+1,str:r.val.toFixed(1)+' N'}));
+    } else if(key==='had_total'){
+      ranked=Object.entries(VALD).filter(([n,arr])=>filterAge(arr[0]?.age)).map(([n,arr])=>{const best=[...arr].sort((a,b)=>((b.had_l||0)+(b.had_r||0))-((a.had_l||0)+(a.had_r||0)))[0];const tot=(best.had_l||0)+(best.had_r||0);return{name:n,age:best.age,pos:PM[n]||'?',val:tot};}).filter(r=>r.val>0).sort((a,b)=>b.val-a.val).map((r,i)=>({...r,rank:i+1,str:r.val.toFixed(1)+' N'}));
+    } else {
+      ranked=Object.entries(VALD).filter(([n,arr])=>filterAge(arr[0]?.age)).map(([n,arr])=>{const best=[...arr].sort((a,b)=>(b[key]||0)-(a[key]||0))[0];return{name:n,age:best.age,pos:PM[n]||'?',val:best[key]||0};}).filter(r=>r.val>0).sort((a,b)=>b.val-a.val).map((r,i)=>({...r,rank:i+1,str:r.val.toFixed(1)+' N'}));
+    }
+  } else if(cat==='nb'&&key==='total'){
+    ranked=Object.entries(NB).filter(([n,arr])=>filterAge(arr[0]?.age)).map(([n,arr])=>{const best=[...arr].sort((a,b)=>((b.l||0)+(b.r||0))-((a.l||0)+(a.r||0)))[0];const tot=(best.l||0)+(best.r||0);return{name:n,age:best.age,pos:PM[n]||'?',val:tot};}).filter(r=>r.val>0).sort((a,b)=>b.val-a.val).map((r,i)=>({...r,rank:i+1,str:r.val.toFixed(1)+' N'}));
+  }
+  const mx=ranked[0]?.val||1;
+  const M=['🥇','🥈','🥉'];
+  document.getElementById('tbl-rank').innerHTML=`<thead><tr><th>#</th><th>Player</th><th>Age</th><th>Pos</th><th>Score</th><th style="min-width:120px">Bar</th></tr></thead><tbody>`+
+    ranked.map((r,i)=>{const pct=r.lower?Math.round((mx-r.val)/mx*100+50):Math.round(r.val/mx*100);const pc=Math.min(pct,100);return `<tr><td><span class="rn ${i<3?'top':''}">${i<3?M[i]:i+1}</span></td><td style="font-weight:600">${r.name}</td><td>${ageBadge(r.age)}</td><td>${posBadge(r.pos)}</td><td style="font-family:var(--font);font-size:16px;font-weight:800;color:${i<3?'#cc0000':'#1a1a1a'}">${r.str}</td><td><div class="rb-w"><div class="rb" style="width:${pc}%"></div><span style="font-size:10px;color:#888">${r.val?.toFixed?.(1)||r.val}</span></div></td></tr>`;}).join('')+'</tbody>';
+}
+
+// ── MOVEMENT SCREEN ──────────────────────────────────────────────
+// MS_SESSIONS now comes from live API (MS_SESSIONS_LIVE)
+const MS_SESSIONS=MS_SESSIONS_LIVE;
+function initMovement(){
+  const pSel=document.getElementById('ms-ep');
+  if(pSel&&!pSel.options.length) PLAYERS.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;pSel.appendChild(o);});
+  // Pre-populate from gym data
+  if(!MS_SESSIONS.length){Object.keys(GYM_LB).forEach(shortName=>{const lb=GYM_LB[shortName],ub=GYM_UB[shortName]||{};const fullName=resolveFullName(shortName);MS_SESSIONS.push({player:fullName,date:'2025-09-01',session:'Pre-Season',lb:{Squat:lb?.squat||3,'Hinge (RDL)':lb?.hinge||3,'Split Squat':lb?.split||3,'Push-up':lb?.pushup||3},ub:{Squat:ub?.squat||3,'Hinge (RDL)':ub?.hinge||3,'Split Squat':ub?.split||3,'Push-up':ub?.pushup||3},notes:''});});}
+  buildMSForm();renderMSOv();renderMSRecent();
+}
+function buildMSForm(){const moves=['Squat','Hinge (RDL)','Split Squat','Push-up'];function build(moves,cid,prefix){document.getElementById(cid).innerHTML=moves.map((m,i)=>`<div style="margin-bottom:10px"><div style="font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px">${m}</div><div class="sr" id="${prefix}-${i}">${[1,2,3,4,5].map(n=>`<button class="sb" data-val="${n}" onclick="msStar('${prefix}-${i}',${n})">${n}</button>`).join('')}</div></div>`).join('');}build(moves,'ms-lb-moves','mslb');build(moves,'ms-ub-moves','msub');}
+function msStar(rowId,val){document.querySelectorAll(`#${rowId} .sb`).forEach(btn=>{const v=+btn.dataset.val;if(v<=val){btn.classList.add('sel');btn.style.background=rcol(val);btn.style.borderColor=rcol(val);btn.style.color='#fff';}else{btn.classList.remove('sel');btn.style.background='';btn.style.borderColor='';btn.style.color='';}});document.getElementById(rowId).dataset.val=val;}
+function msGetR(id){return+document.getElementById(id)?.dataset.val||3}
+function msSave(){const p=document.getElementById('ms-ep').value,date=document.getElementById('ms-ed').value,sess=document.getElementById('ms-es').value,notes=document.getElementById('ms-notes').value;const moves=['Squat','Hinge (RDL)','Split Squat','Push-up'];const lb={},ub={};moves.forEach((m,i)=>{lb[m]=msGetR('mslb-'+i);ub[m]=msGetR('msub-'+i);});MS_SESSIONS.unshift({player:p,date,session:sess,lb,ub,notes});const msg=document.getElementById('ms-msg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',3000);renderMSOv();renderMSRecent();}
+function msAvg(s,type){const v=Object.values(s[type]||{}).filter(x=>x);return v.length?+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(1):0;}
+function resolveFullName(shortName){
+  // Try exact match first
+  const exact = PLAYERS.find(p=>p===shortName);
+  if(exact) return exact;
+  // Try first name match
+  const byFirst = PLAYERS.find(p=>p.split(' ')[0]===shortName);
+  if(byFirst) return byFirst;
+  // Try startsWith
+  const byStart = PLAYERS.find(p=>p.startsWith(shortName));
+  if(byStart) return byStart;
+  // Try case-insensitive first name
+  const lower = shortName.toLowerCase();
+  const byLower = PLAYERS.find(p=>p.split(' ')[0].toLowerCase()===lower);
+  if(byLower) return byLower;
+  // Map common nicknames/shortnames
+  const nickMap={
+    'Oscar':'Oscar Andrade','Johnny':'Jonathan David','Ziggy':'Zane Baitinger',
+    'Malachi':'Malachi Joseph','Oliver':'Oliver Chatwal','Mason':'Mason Cominski',
+    'Arseniy':'Arseniy Kopytchak','Joao':'Joao Barreto','Tristan':'Tristan Booth',
+    'Elliot':'Elliot Wong','Estifanos':'Estifanos Thompson','Mor':'Mor Mane Thiam',
+    'Carlos':'Carlos Palma','Akwasi':'Akwasi Afriyie','Wells':'Wells Kasserman',
+    'AJ':'Aaron Judka','Sasha':'Aleks Menshikov','Jamie':'Jamie Cregan',
+    'Jonathan':'Jonathan David','Michael':'Michael McShane','Jeff':'Jeffry Mendez',
+    'Pietro':'Pietro Lolos','Thiago':'Thiago Romany','Niko':'Nikolas Kruczek',
+    'Matt Rodi':'Matthew Rodi'
+  };
+  return nickMap[shortName] || shortName;
+}
+function renderMSOv(){
+  const latest={};MS_SESSIONS.forEach(s=>{if(!latest[s.player])latest[s.player]=s;});const rows=Object.values(latest);
+  document.getElementById('tbl-ms-ov').innerHTML=`<thead><tr><th>Player</th><th>Pos</th><th>Date</th><th>LB Avg</th><th>UB Avg</th><th>Squat</th><th>Hinge</th><th>Split</th><th>Push-up</th></tr></thead><tbody>`+
+    rows.map(s=>{const lb=msAvg(s,'lb'),ub=msAvg(s,'ub'),pos=PM[s.player]||'?';return`<tr><td style="font-weight:600">${s.player}</td><td>${posBadge(pos)}</td><td style="color:#888">${s.date}</td><td>${rpill(Math.round(lb))}</td><td>${rpill(Math.round(ub))}</td><td>${rpill(s.lb['Squat']||3)}</td><td>${rpill(s.lb['Hinge (RDL)']||3)}</td><td>${rpill(s.lb['Split Squat']||3)}</td><td>${rpill(s.ub['Push-up']||3)}</td></tr>`;}).join('')+'</tbody>';
+  const dist=[0,0,0,0,0],udist=[0,0,0,0,0];rows.forEach(s=>{[1,2,3,4,5].forEach(r=>{Object.values(s.lb||{}).forEach(v=>{if(Math.round(v)===r)dist[r-1]++;});Object.values(s.ub||{}).forEach(v=>{if(Math.round(v)===r)udist[r-1]++;});});});
+  const rc=['#cc0000','#e05000','#d4a000','#5a9000','#007a30'];
+  const c1=document.getElementById('c-ms-lb');if(c1){if(CH['c-ms-lb'])CH['c-ms-lb'].destroy();CH['c-ms-lb']=new Chart(c1,{type:'bar',data:{labels:['1','2','3','4','5'],datasets:[{data:dist,backgroundColor:rc,borderRadius:3,borderWidth:0}]},options:bOpt()});}
+  const c2=document.getElementById('c-ms-ub');if(c2){if(CH['c-ms-ub'])CH['c-ms-ub'].destroy();CH['c-ms-ub']=new Chart(c2,{type:'bar',data:{labels:['1','2','3','4','5'],datasets:[{data:udist,backgroundColor:rc,borderRadius:3,borderWidth:0}]},options:bOpt()});}
+}
+function renderMSRecent(){document.getElementById('tbl-ms-rec').innerHTML=`<thead><tr><th>Player</th><th>Date</th><th>Session</th><th>LB Avg</th><th>UB Avg</th></tr></thead><tbody>`+MS_SESSIONS.slice(0,15).map(s=>`<tr><td style="font-weight:600">${s.player}</td><td style="color:#888">${s.date}</td><td><span class="badge bgy">${s.session}</span></td><td>${rpill(Math.round(msAvg(s,'lb')))}</td><td>${rpill(Math.round(msAvg(s,'ub')))}</td></tr>`).join('')+'</tbody>';}
+function renderMSPlayer(){const pn=document.getElementById('ms-pp').value;const pSess=MS_SESSIONS.filter(s=>s.player===pn);const el=document.getElementById('ms-player-content');if(!pSess.length){el.innerHTML='<div style="padding:20px;color:#888">No sessions logged.</div>';return;}const lat=pSess[0];const lb=msAvg(lat,'lb'),ub=msAvg(lat,'ub');el.innerHTML=`<div class="panel sg"><div style="display:flex;gap:16px;flex-wrap:wrap"><div><div style="font-family:var(--font);font-size:20px;font-weight:800">${pn}</div><div style="font-size:12px;color:#888;margin-top:2px">${PM[pn]||'?'} · Last: ${lat.date}</div><div style="display:flex;gap:14px;margin-top:10px"><div style="text-align:center"><div style="font-family:var(--font);font-size:28px;font-weight:800;color:${rcol(Math.round(lb))}">${lb}</div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;font-family:var(--font)">Lower Body</div></div><div style="text-align:center"><div style="font-family:var(--font);font-size:28px;font-weight:800;color:${rcol(Math.round(ub))}">${ub}</div><div style="font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:#888;font-family:var(--font)">Upper Body</div></div></div></div><div style="flex:1;min-width:220px">${['Squat','Hinge (RDL)','Split Squat','Push-up'].map(m=>`<div style="display:flex;align-items:center;gap:8px;margin-bottom:5px"><span style="font-size:11px;color:#555;min-width:100px">${m}</span><div class="pb" style="flex:1"><div class="pf" style="width:${(lat.lb[m]||3)/5*100}%;background:${rcol(lat.lb[m]||3)}"></div></div><span class="rpill" style="background:${rcol(lat.lb[m]||3)}">${lat.lb[m]||3}</span></div>`).join('')}</div></div></div>`;}
+
+// ── BOOT ─────────────────────────────────────────────────────────
+// Boot triggered by loadAllData()
+</script>
+</body>
+</html>
+window.addEventListener('load', loadAllData);
+</script>
+</body>
+</html>
