@@ -146,7 +146,7 @@ const p = String(pos).trim().toUpperCase();
   if (p.includes('FB') || p.includes('FULL') || p.includes('BACK')) return 'FB';
   if (p.includes('MF') || p.includes('MID')) return 'MF';
   if (p.includes('FW') || p.includes('FOR') || p.includes('ATT')) return 'FW';
-  return pos.trim();
+  return String(pos).trim();
 }
 
 function getWeekNumber(d) {
