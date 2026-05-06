@@ -14,9 +14,9 @@ module.exports = async (req, res) => {
       if (!byPlayer[player]) byPlayer[player] = [];
       byPlayer[player].push({
         date:   row['Date']   || row['date']   || null,
-        height: toNum(row['Jump Height'] || row['Height'] || row['height'] || row['CMJ Height']),
-        rsi:    toNum(row['RSI']    || row['rsi']    || row['RSI-modified'] || row['RSImod']),
-        power:  toNum(row['Power']  || row['power']  || row['Peak Power'] || row['Power/BM']),
+height: toNum(row['Jump Height (In cm)'] || row['Jump Height'] || row['Height'] || row['CMJ Height']),
+rsi:    toNum(row['RSI-modified [m/s]'] || row['RSI-modified'] || row['RSI'] || row['RSImod']),
+power:  toNum(row['Peak Power / BM [W/kg]'] || row['Peak Power / E'] || row['Peak Power'] || row['Power/BM'] || row['Power']),
         age:    row['Age Group'] || row['Age'] || row['age'] || row['AgeGroup'] || null,
       });
     });
