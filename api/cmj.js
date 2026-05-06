@@ -1,26 +1,9 @@
-// /api/cmj — CMJ_VALD tab
 const { fetchSheet } = require('./_sheet');
 module.exports = async (req, res) => {
-  if (req.method === 'OPTIONS') return res.status(200).end();
   try {
     const rows = await fetchSheet('CMJ_VALD');
-    const byPlayer = {};
-    rows.forEach(row => {
-      const player = row['Name'];
-      if (!player) return;
-      if (!byPlayer[player]) byPlayer[player] = [];
-      byPlayer[player].push({
-        date:   row['Date']   || null,
-        height: toNum(row['Jump Height (Imp-Mom) [cm]']),
-        rsi:    toNum(row['RSI-modified [m/s]']),
-        power:  toNum(row['Peak Power / BM [W/kg]']),
-        age:    row['Age Group'] || null,
-      });
-    });
-    Object.keys(byPlayer).forEach(p => {
-      byPlayer[p].sort((a, b) => (a.date||'').localeCompare(b.date||''));
-    });
-    res.status(200).json(byPlayer);
+    return res.status(200).json({ count: rows.length, sample: rows[0] });
   } catch (err) {
-    console.error(err);
-    res.
+    return res.status(200).json({ error: err.message, stack: err.stack });
+  }
+};
