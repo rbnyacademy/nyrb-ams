@@ -1,46 +1,32 @@
 // /api/movement — Movement_Screen tab
 const { fetchSheet } = require('./_sheet');
-
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
-
   try {
     const rows = await fetchSheet('Movement_Screen');
-    const sessions = [];
-
+    const byPlayer = {};
     rows.forEach(row => {
-      const player = row['Player'] || row['player'] || row['Name'] || row['name'];
+      const player = `${row['GivenName'] || ''} ${row['FamilyName'] || ''}`.trim();
       if (!player) return;
-      sessions.push({
-        player,
-        date:    row['Date']    || row['date']    || null,
-        session: row['Session'] || row['session'] || null,
-        notes:   row['Notes']  || row['notes']   || '',
-        lb: {
-          'Squat':       toNum(row['LB Squat']       || row['Squat LB']    || row['Squat']),
-          'Hinge (RDL)': toNum(row['LB Hinge']       || row['Hinge LB']    || row['Hinge'] || row['RDL']),
-          'Split Squat': toNum(row['LB Split Squat']  || row['Split LB']   || row['Split Squat']),
-          'Push-up':     toNum(row['UB Push-up']      || row['Push-up UB'] || row['Push-up'] || row['Push Up']),
-        },
-        ub: {
-          'Squat':       toNum(row['UB Squat']        || row['Squat UB']),
-          'Hinge (RDL)': toNum(row['UB Hinge']        || row['Hinge UB']),
-          'Split Squat': toNum(row['UB Split Squat']   || row['Split UB']),
-          'Push-up':     toNum(row['UB Push-up']       || row['Push-up UB'] || row['Push Up UB']),
-        },
+      if (!byPlayer[player]) byPlayer[player] = [];
+      byPlayer[player].push({
+        date:       row['Date'] || null,
+        age:        row['Age Group'] || null,
+        squat:      toNum(row['Squat']),
+        hinge:      toNum(row['Hinge hands on hips']),
+        splitSquat: toNum(row['Split squats']),
+        pushups:    toNum(row['Pushups']),
       });
     });
-
-    // Sort by date descending (most recent first)
-    sessions.sort((a, b) => (b.date||'').localeCompare(a.date||''));
-
-    res.status(200).json(sessions);
+    Object.keys(byPlayer).forEach(p => {
+      byPlayer[p].sort((a, b) => (a.date||'').localeCompare(b.date||''));
+    });
+    res.status(200).json(byPlayer);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
-
 function toNum(v) {
   if (v === null || v === undefined || v === '') return null;
   const n = parseFloat(v);
