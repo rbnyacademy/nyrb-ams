@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   try {
-    const rows = await fetchSheet('VALD_CMJ');
+    const rows = await fetchSheet('VALD_CMJ'); if (req.query.debug) return res.status(200).json(Object.keys(rows[0] || {}));
     const byPlayer = {};
 
     rows.forEach(row => {
