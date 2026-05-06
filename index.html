@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+<head
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
@@ -130,7 +130,7 @@ tr:last-child td{border-bottom:none}
 
 <div class="topbar">
   <div class="logo-box"><img src="https://upload.wikimedia.org/wikipedia/en/thumb/9/9a/New_York_Red_Bulls_logo.svg/100px-New_York_Red_Bulls_logo.svg.png" alt="NYRB" onerror="this.style.display='none'"/></div>
-  <div class="rpt-title">NY Red Bulls Academy</div>
+  <div class="rpt-title">RBNY Academy</div>
   <div class="tb-pills">
     <div class="pill" style="cursor:pointer" onclick="loadAllData()" title="Refresh data">↻ <span id="last-updated" style="font-size:10px;opacity:.8">Loading…</span></div>
     <div class="pill"><select id="g-age" onchange="filterAge()"><option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option><option value="U16">U16</option><option value="U18">U18</option></select>▾</div>
@@ -259,7 +259,7 @@ tr:last-child td{border-bottom:none}
   <div class="vald-wrap">
     <div class="vald-tb">
       <div style="display:flex;align-items:center;gap:6px"><span class="vl">Name</span><select class="vc" id="vald-player"></select></div>
-      <div class="vtitle">NY Red Bulls Academy Testing</div>
+      <div class="vtitle">RBNY Academy Testing</div>
       <div style="display:flex;align-items:center;gap:6px"><span class="vl">Age</span><select class="vc" id="vald-age-f" onchange="renderVald()"><option value="all">All</option><option value="U14">U14</option><option value="U15">U15</option><option value="U16">U16</option><option value="U18">U18</option></select></div>
       <div style="display:flex;align-items:center;gap:6px"><span class="vl">Date range</span><select class="vc" id="vald-date-range" onchange="renderVald()"><option value="all">All Dates</option><option value="latest">Latest only</option><option value="2024">2024</option><option value="2025">2025</option><option value="2026">2026</option></select></div>
     </div>
