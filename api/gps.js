@@ -1,28 +1,26 @@
 // /api/gps — GPS_Daily tab
 const { fetchSheet } = require('./_sheet');
-
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
-
   try {
     const rows = await fetchSheet('GPS_Daily');
     const byPlayer = {};
     const posMap = {};
-
+    const ageMap = {};
     rows.forEach(row => {
       const player = row['Name'];
       if (!player) return;
-
       const pos = row['Position'] || '';
+      const age = row['Age Group'] || '';
       if (pos) posMap[player] = normalizePos(pos);
-
+      if (age) ageMap[player] = age.trim();
       if (!byPlayer[player]) byPlayer[player] = [];
-
       byPlayer[player].push({
         date:    row['Date']                              || null,
         session: row['Session Type']                      || null,
         md:      row['MD (-)']                            || null,
         pos:     row['Position']                          || null,
+        age:     row['Age Group']                         || null,
         dist:    toNum(row['Distance (m)']),
         hsr:     toNum(row['Distance (HSR) (m)']),
         vhsr:    toNum(row['Distance (VHSR) (m)']),
@@ -36,19 +34,15 @@ module.exports = async (req, res) => {
         mins:    toNum(row['Game Minutes']),
       });
     });
-
     Object.keys(byPlayer).forEach(p => {
       byPlayer[p].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
     });
-
     const latest = {};
     Object.keys(byPlayer).forEach(p => {
       const sessions = byPlayer[p].filter(s => s.dist);
       if (sessions.length) latest[p] = { ...sessions[sessions.length - 1], player: p, pos: posMap[p] || 'MF' };
     });
-
     const allDates = [...new Set(rows.map(r => r['Date']).filter(Boolean))].sort();
-
     const matchSessions = rows.filter(r => r['MD (-)'] === 'MD' && r['Distance (m)']);
     const matchByDate = {};
     matchSessions.forEach(r => {
@@ -59,6 +53,7 @@ module.exports = async (req, res) => {
       matchByDate[d].data.push({
         name:    player,
         pos:     r['Position']                          || null,
+        age:     r['Age Group']                         || null,
         date:    d,
         session: r['Session Type'],
         md:      'MD',
@@ -75,7 +70,6 @@ module.exports = async (req, res) => {
       });
     });
     const matchList = Object.entries(matchByDate).sort(([a], [b]) => a.localeCompare(b));
-
     const weeklyMap = {};
     rows.forEach(r => {
       const d = r['Date'];
@@ -98,7 +92,6 @@ module.exports = async (req, res) => {
         if (mapped[k] != null) weeklyMap[wk][k].push(mapped[k]);
       });
     });
-
     const teamWeekly = {};
     Object.keys(weeklyMap).sort().forEach(wk => {
       teamWeekly[wk] = {};
@@ -107,10 +100,10 @@ module.exports = async (req, res) => {
         teamWeekly[wk][k] = vals.length ? +(vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1) : null;
       });
     });
-
     res.status(200).json({
       players: Object.keys(byPlayer).sort(),
       pos_map: posMap,
+      age_map: ageMap,
       gps: byPlayer,
       latest,
       all_dates: allDates,
@@ -118,19 +111,16 @@ module.exports = async (req, res) => {
       team_weekly: teamWeekly,
       week_keys: Object.keys(teamWeekly).sort(),
     });
-
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
-
 function toNum(v) {
   if (v === null || v === undefined || v === '') return null;
   const n = parseFloat(v);
   return isNaN(n) ? null : n;
 }
-
 function normalizePos(pos) {
   const p = String(pos).trim().toUpperCase();
   if (p.includes('GK') || p.includes('GOAL')) return 'GK';
@@ -140,7 +130,6 @@ function normalizePos(pos) {
   if (p.includes('FW') || p.includes('FOR') || p.includes('ATT')) return 'FW';
   return String(pos).trim();
 }
-
 function getWeekNumber(d) {
   const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
   const dayNum = date.getUTCDay() || 7;
