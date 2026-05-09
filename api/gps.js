@@ -34,15 +34,17 @@ module.exports = async (req, res) => {
         mins:    toNum(row['Session Length (Mins)']),
       });
     });
+    // Sort each player's sessions by parsed date (handles M/D/YY and YYYY-MM-DD)
     Object.keys(byPlayer).forEach(p => {
-      byPlayer[p].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      byPlayer[p].sort((a, b) => parseSheetDate(a.date) - parseSheetDate(b.date));
     });
     const latest = {};
     Object.keys(byPlayer).forEach(p => {
       const sessions = byPlayer[p].filter(s => s.dist);
       if (sessions.length) latest[p] = { ...sessions[sessions.length - 1], player: p, pos: posMap[p] || 'MF' };
     });
-    const allDates = [...new Set(rows.map(r => r['Date']).filter(Boolean))].sort();
+    const allDates = [...new Set(rows.map(r => r['Date']).filter(Boolean))]
+      .sort((a, b) => parseSheetDate(a) - parseSheetDate(b));
     const matchSessions = rows.filter(r => r['MD (-)'] === 'MD' && r['Distance (m)']);
     const matchByDate = {};
     matchSessions.forEach(r => {
@@ -69,14 +71,15 @@ module.exports = async (req, res) => {
         mins:    toNum(r['Session Length (Mins)']),
       });
     });
-    const matchList = Object.entries(matchByDate).sort(([a], [b]) => a.localeCompare(b));
+    const matchList = Object.entries(matchByDate)
+      .sort(([a], [b]) => parseSheetDate(a) - parseSheetDate(b));
     const weeklyMap = {};
     rows.forEach(r => {
       const d = r['Date'];
       if (!d) return;
-      const date = new Date(d);
+      const date = parseSheetDate(d);
       if (isNaN(date)) return;
-      const wk = `${date.getFullYear()}-W${String(getWeekNumber(date)).padStart(2, '0')}`;
+      const wk = `${date.getUTCFullYear()}-W${String(getWeekNumber(date)).padStart(2, '0')}`;
       if (!weeklyMap[wk]) weeklyMap[wk] = { dist: [], dpm: [], hsr: [], sprint: [], expl: [], maxspd: [], acc: [], dec: [] };
       const mapped = {
         dist:   toNum(r['Distance (m)']),
@@ -120,6 +123,26 @@ function toNum(v) {
   if (v === null || v === undefined || v === '') return null;
   const n = parseFloat(v);
   return isNaN(n) ? null : n;
+}
+// Robustly parse date strings from Google Sheets.
+// Handles: "M/D/YY", "M/D/YYYY", "MM/DD/YY", "YYYY-MM-DD"
+// Always returns a UTC Date so comparisons are timezone-safe.
+function parseSheetDate(s) {
+  if (!s) return new Date(NaN);
+  s = String(s).trim();
+  if (s.includes('-')) {
+    // YYYY-MM-DD — parse as UTC explicitly
+    const [y, m, d] = s.split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, d));
+  }
+  if (s.includes('/')) {
+    const parts = s.split('/').map(Number);
+    const [m, d] = parts;
+    let y = parts[2];
+    if (y < 100) y = 2000 + y;
+    return new Date(Date.UTC(y, m - 1, d));
+  }
+  return new Date(NaN);
 }
 function normalizePos(pos) {
   const p = String(pos).trim().toUpperCase();
