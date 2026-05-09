@@ -31,7 +31,7 @@ module.exports = async (req, res) => {
         acc:     toNum(row['Accelerations (high)']),
         dec:     toNum(row['Decelerations (high)']),
         hml:     toNum(row['HMLD (m)']),
-        mins:    toNum(row['Game Minutes']),
+        mins:    toNum(row['Session Length (Mins)']),
       });
     });
     Object.keys(byPlayer).forEach(p => {
