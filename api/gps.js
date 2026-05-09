@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
       if (!d || !player) return;
       if (!matchByDate[d]) matchByDate[d] = { label: r['Session Type'], data: [] };
       matchByDate[d].data.push({
-        name:    player,
+        player:  player,
         pos:     r['Position']                          || null,
         age:     r['Age Group']                         || null,
         date:    d,
@@ -66,7 +66,7 @@ module.exports = async (req, res) => {
         acc:     toNum(r['Accelerations (high)']),
         dec:     toNum(r['Decelerations (high)']),
         hml:     toNum(r['HMLD (m)']),
-        mins:    toNum(r['Game Minutes']),
+        mins:    toNum(r['Session Length (Mins)']),
       });
     });
     const matchList = Object.entries(matchByDate).sort(([a], [b]) => a.localeCompare(b));
