@@ -349,7 +349,7 @@ tr:last-child td{border-bottom:none}
 <!-- MD+/- -->
 <div class="page" id="page-mdpm">
   <div class="main">
-    <div class="ctrl-row"><span class="cl">Player:</span><select class="ctrl" id="mdpm-player"></select><span class="cl">Participation:</span><select class="ctrl" id="mdpm-part" onchange="renderMdpm()"><option value="full">Full Only</option><option value="all">All</option></select></div>
+    <div class="ctrl-row"><span class="cl">Age:</span><select class="ctrl" id="mdpm-age" onchange="initMdpm()"><option value="all">All Ages</option><option value="U13">U13</option><option value="U14">U14</option><option value="U15">U15</option><option value="U16">U16</option><option value="U18">U18</option></select><span class="cl">Player:</span><select class="ctrl" id="mdpm-player"></select><span class="cl">Participation:</span><select class="ctrl" id="mdpm-part" onchange="renderMdpm()"><option value="full">Full Only</option><option value="all">All</option></select></div>
     <div class="md-chips" id="mdpm-chips"></div>
     <div style="display:flex;align-items:center;gap:16px;margin-bottom:10px;padding:0 2px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:6px">
@@ -989,11 +989,15 @@ function renderPCTesting(){
 
 // ── MD+/- ─────────────────────────────────────────────────────────
 function initMdpm(){
+  const ageF=document.getElementById('mdpm-age')?.value||'all';
   const sel=document.getElementById('mdpm-player');
-  if(!sel.options.length){
-    [...PLAYERS].sort((a,b)=>a.localeCompare(b))
-      .forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
-  }
+  const prev=sel.value;
+  sel.innerHTML='';
+  [...PLAYERS]
+    .filter(p=>ageF==='all'||AM[p]===ageF)
+    .sort((a,b)=>a.localeCompare(b))
+    .forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
+  if([...sel.options].some(o=>o.value===prev))sel.value=prev;
   sel.onchange=renderMdpm;renderMdpm();
 }
 function renderMdpm(){
