@@ -362,8 +362,9 @@ tr:last-child td{border-bottom:none}
       </div>
     </div>
     <div class="pg g2 sg"><div class="panel"><div class="pt">Total Distance vs MD Avg</div><div class="cb"><canvas id="c-mdpm-dist"></canvas></div></div><div class="panel"><div class="pt">HSR vs MD Avg</div><div class="cb"><canvas id="c-mdpm-hsr"></canvas></div></div></div>
-    <div class="pg g2 sg"><div class="panel"><div class="pt">Sprint vs MD Avg</div><div class="cb"><canvas id="c-mdpm-sprint"></canvas></div></div><div class="panel"><div class="pt">Explosive vs MD Avg</div><div class="cb"><canvas id="c-mdpm-expl"></canvas></div></div></div>
-    <div class="pg g2 sg"><div class="panel"><div class="pt">Accelerations vs MD Avg</div><div class="cb"><canvas id="c-mdpm-acc"></canvas></div></div><div class="panel"><div class="pt">Decelerations vs MD Avg</div><div class="cb"><canvas id="c-mdpm-dec"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">VHSR vs MD Avg</div><div class="cb"><canvas id="c-mdpm-vhsr"></canvas></div></div><div class="panel"><div class="pt">Sprint vs MD Avg</div><div class="cb"><canvas id="c-mdpm-sprint"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Explosive vs MD Avg</div><div class="cb"><canvas id="c-mdpm-expl"></canvas></div></div><div class="panel"><div class="pt">Accelerations vs MD Avg</div><div class="cb"><canvas id="c-mdpm-acc"></canvas></div></div></div>
+    <div class="pg g2 sg"><div class="panel"><div class="pt">Decelerations vs MD Avg</div><div class="cb"><canvas id="c-mdpm-dec"></canvas></div></div></div>
   </div>
 </div>
 
@@ -1024,7 +1025,7 @@ function renderMdpm(){
   const cc=d=>d==='MD'?'#1a1a1a':d.includes('+')?'#990000':'#cc0000';
   const distAvgs=MD_DAYS.map(d=>activeGroups[d]?.length?Math.round(avg(activeGroups[d].map(s=>s.dist))):null);
   document.getElementById('mdpm-chips').innerHTML=MD_DAYS.map((d,i)=>`<div class="md-chip" style="border-top-color:${cc(d)}"><div class="mcd" style="color:${cc(d)}">${d}</div><div class="mcv" style="color:${cc(d)}">${distAvgs[i]||'—'}</div><div class="mcu">m avg</div></div>`).join('');
-  ['dist','hsr','sprint','expl','acc','dec'].forEach(k=>{
+  ['dist','hsr','vhsr','sprint','expl','acc','dec'].forEach(k=>{
     const avgs=MD_DAYS.map(d=>activeGroups[d]?.length?Math.round(avg(activeGroups[d].map(s=>s[k]).filter(x=>x!=null))):null);
     mkBarLine('c-mdpm-'+k,MD_DAYS,avgs,Array(7).fill(Math.round(avg(avgs.filter(x=>x!=null))||0)),MC[k]?.c||'#cc0000');
   });
