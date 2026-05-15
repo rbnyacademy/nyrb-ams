@@ -993,6 +993,9 @@ function initMdpm(){
   const sel=document.getElementById('mdpm-player');
   const prev=sel.value;
   sel.innerHTML='';
+  if(ageF!=='all'){
+    const o=document.createElement('option');o.value='__group__';o.textContent='— Age Group Avg —';sel.appendChild(o);
+  }
   [...PLAYERS]
     .filter(p=>ageF==='all'||AM[p]===ageF)
     .sort((a,b)=>a.localeCompare(b))
@@ -1002,8 +1005,14 @@ function initMdpm(){
 }
 function renderMdpm(){
   const player=document.getElementById('mdpm-player').value;
+  const ageF=document.getElementById('mdpm-age')?.value||'all';
   const partF=document.getElementById('mdpm-part')?.value||'full';
-  const sessions=(GPS[player]||[]).filter(s=>s.dist&&s.md);
+  let sessions;
+  if(player==='__group__'){
+    sessions=PLAYERS.filter(p=>AM[p]===ageF).flatMap(p=>(GPS[p]||[]).filter(s=>s.dist&&s.md));
+  } else {
+    sessions=(GPS[player]||[]).filter(s=>s.dist&&s.md);
+  }
   const mdGroups={'MD-5':[],'MD-4':[],'MD-3':[],'MD-2':[],'MD-1':[],'MD':[],'MD+1':[]};
   sessions.forEach(s=>{const md=String(s.md).trim();if(mdGroups[md])mdGroups[md].push(s);});
   const activeGroups={};
